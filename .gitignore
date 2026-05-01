@@ -1,45 +1,93 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-# dependencies
+# ─── Dependencies ────────────────────────────────────────────────────────────
 node_modules/
-backend/node_modules
-frontend/node_modules
+.pnp
+.pnp.js
 
-# Expo
-.expo/
+# ─── Build outputs ───────────────────────────────────────────────────────────
 dist/
+build/
+out/
+lib/
+
+# ─── TypeScript ──────────────────────────────────────────────────────────────
+*.tsbuildinfo
+*.js.map
+
+# ─── Environment files ───────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+# Keep .env.example committed as a template
+!.env.example
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ─── Runtime / OS ────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.pem
+
+# ─── Editor ──────────────────────────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ─── Node.js / Backend ───────────────────────────────────────────────────────
+backend/node_modules/
+backend/dist/
+backend/build/
+backend/*.tsbuildinfo
+
+# ─── React Native / Expo (Frontend) ─────────────────────────────────────────
+frontend/node_modules/
+frontend/.expo/
+frontend/dist/
+frontend/web-build/
+frontend/.metro-health-check*
+frontend/expo-env.d.ts
+
+# Expo generated native folders
+/ios
+/android
+.expo/
 web-build/
 expo-env.d.ts
 
-# Native
-.kotlin/
-*.orig.*
+# Metro bundler
+.metro-health-check*
+
+# Native signing / credentials
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
+*.orig.*
+.kotlin/
 
-# Metro
-.metro-health-check*
+# ─── Testing ─────────────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
 
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
-.DS_Store
-*.pem
-
-# local env files
-.env*.local
-
-# typescript
-*.tsbuildinfo
-
+# ─── Misc ────────────────────────────────────────────────────────────────────
 app-example
-
-# generated native folders
-/ios
-/android
+.cache/

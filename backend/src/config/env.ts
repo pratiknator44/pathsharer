@@ -19,4 +19,5 @@ export const env = {
   JWT_SECRET: required("JWT_SECRET"),
   RATE_LIMIT_WINDOW_MS: parseInt(optional("RATE_LIMIT_WINDOW_MS", "60000"), 10),
   RATE_LIMIT_MAX: parseInt(optional("RATE_LIMIT_MAX", "100"), 10),
+  REDIS_URL: optional("REDIS_URL", "redis://localhost:6379"),
 } as const;

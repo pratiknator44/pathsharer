@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
+    ActivityIndicator,
     Alert,
     KeyboardAvoidingView,
     Platform,
@@ -14,6 +15,8 @@ import {
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { API_URL } from '@/utils/api';
+import { saveAuthToken } from '@/utils/storage';
 
 const FAKE_OTP = '000000';
 const OTP_LENGTH = 6;
@@ -27,6 +30,7 @@ export default function OtpScreen() {
 
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(''));
   const inputs = useRef<(TextInput | null)[]>([]);
+  const [verifying, setVerifying] = useState(false);
 
   const inputBg = colorScheme === 'dark' ? '#1e1e1e' : '#f5f5f5';
   const inputBorder = colorScheme === 'dark' ? '#444' : '#ddd';
@@ -47,7 +51,7 @@ export default function OtpScreen() {
     }
   }
 
-  function handleVerify() {
+  async function handleVerify() {
     const entered = otp.join('');
     if (entered.length < OTP_LENGTH) {
       Alert.alert('Enter OTP', 'Please enter all 6 digits.');
@@ -57,7 +61,34 @@ export default function OtpScreen() {
       Alert.alert('Incorrect OTP', 'The code you entered is wrong. Try 000000.');
       return;
     }
-    signIn(phone ?? '');
+
+    setVerifying(true);
+    try {
+      // Look up user by phone — response includes { data, token }
+      const res = await fetch(
+        `${API_URL}/users/by-phone?phone=${encodeURIComponent(phone ?? '')}`,
+      );
+
+      if (!res.ok) {
+        throw new Error(`Server error ${res.status}`);
+      }
+
+      const json = await res.json() as { data: any; token?: string };
+
+      if (json.token) {
+        await saveAuthToken(json.token);
+      } else {
+        // User not found — we will proceed to signIn anyway. 
+        // The user screen will prompt them to fill their details and create the account.
+        console.log("New user - proceeding to registration");
+      }
+
+      signIn(phone ?? '');
+    } catch (err: any) {
+      Alert.alert('Error', err?.message ?? 'Could not verify. Please try again.');
+    } finally {
+      setVerifying(false);
+    }
   }
 
   function handleResend() {
@@ -108,10 +139,14 @@ export default function OtpScreen() {
 
         {/* Verify */}
         <TouchableOpacity
-          style={[styles.verifyButton, { backgroundColor: colors.tint }]}
+          style={[styles.verifyButton, { backgroundColor: colors.tint, opacity: verifying ? 0.7 : 1 }]}
           onPress={handleVerify}
+          disabled={verifying}
           activeOpacity={0.85}>
-          <Text style={styles.verifyText}>Verify</Text>
+          {verifying
+            ? <ActivityIndicator color="#fff" />
+            : <Text style={styles.verifyText}>Verify</Text>
+          }
         </TouchableOpacity>
 
         {/* Resend */}

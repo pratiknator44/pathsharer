@@ -18,6 +18,7 @@ import { Colors } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { API_URL } from '@/utils/api';
+import { saveAuthToken } from '@/utils/storage';
 
 export default function UserScreen() {
   const colorScheme = useColorScheme() ?? 'light';
@@ -104,6 +105,10 @@ export default function UserScreen() {
       if (!res.ok) {
         Alert.alert('Error', json.error ?? 'Failed to save user profile');
         return;
+      }
+
+      if (json.token) {
+        await saveAuthToken(json.token);
       }
 
       Alert.alert('Success', 'Profile saved successfully!', [

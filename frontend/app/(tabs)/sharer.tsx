@@ -2,6 +2,7 @@ import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
 import {
     ActivityIndicator,
+    Alert,
     Keyboard,
     Linking,
     Platform,
@@ -9,14 +10,18 @@ import {
     Switch,
     Text,
     TextInput,
+    ToastAndroid,
     TouchableOpacity,
     View,
 } from 'react-native';
 import MapView, { Polyline, UrlTile } from 'react-native-maps';
+import { useRouter } from 'expo-router';
 
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { API_URL } from '@/utils/api';
+import { getAuthToken } from '@/utils/storage';
 
 const GEOAPIFY_KEY = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY ?? 'GEOAPIFY_API_KEY';
 const TILE_URL_LIGHT =
@@ -107,6 +112,7 @@ export default function SharerScreen() {
   const colors = Colors[colorScheme];
   const mapRef = useRef<MapView>(null);
   const { userGender } = useAuth();
+  const router = useRouter();
 
   const [permission, setPermission] = useState<PermissionState>('checking');
   const [gpsCoords, setGpsCoords] = useState<LatLng | null>(null);
@@ -134,6 +140,84 @@ export default function SharerScreen() {
 
   // Female-only preference (only relevant when userGender === 'female')
   const [femaleOnly, setFemaleOnly] = useState(false);
+
+  // API call state
+  const [savingLocation, setSavingLocation] = useState(false);
+
+  async function handleFindCoPassengers() {
+    if (sourceCoords === null || destCoords === null) return;
+
+    const token = await getAuthToken();
+    if (!token) {
+      Alert.alert('Not signed in', 'Please log in to find co-passengers.');
+      return;
+    }
+
+    setSavingLocation(true);
+    try {
+      const res = await fetch(`${API_URL}/active-users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          isActive: true,
+          source: {
+            name: sourceText || 'Source',
+            coordinates: [sourceCoords.longitude, sourceCoords.latitude],
+          },
+          destination: {
+            name: destText || 'Destination',
+            coordinates: [destCoords.longitude, destCoords.latitude],
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error((body as any)?.error ?? `Server error ${res.status}`);
+      }
+
+      // 1. When 200 is received, send the coordinates to /nearby api call
+      const nearbyRes = await fetch(`${API_URL}/active-users/nearby?lng=${sourceCoords.longitude}&lat=${sourceCoords.latitude}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!nearbyRes.ok) {
+        throw new Error(`Server error ${nearbyRes.status} while fetching nearby users`);
+      }
+
+      const nearbyBody = await nearbyRes.json();
+      const users = nearbyBody.data || [];
+
+      // 3. If no user is found just toast the message "No copassengers nearby :( "
+      if (users.length === 0) {
+        if (Platform.OS === 'android') {
+          ToastAndroid.show('No copassengers nearby :(', ToastAndroid.SHORT);
+        } else {
+          Alert.alert('No copassengers', 'No copassengers nearby :(');
+        }
+      } else {
+        // 2. Navigate to "Potential Copassengers" screen
+        router.push({
+          pathname: '/potential-copassengers',
+          params: {
+            users: JSON.stringify(users),
+            sourceName: sourceText || 'Source',
+            destName: destText || 'Destination'
+          }
+        });
+      }
+    } catch (err: any) {
+      Alert.alert('Error', err?.message ?? 'Could not save your location. Try again.');
+    } finally {
+      setSavingLocation(false);
+    }
+  }
 
   const sourceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const destTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -519,10 +603,21 @@ export default function SharerScreen() {
               opacity: sourceCoords !== null && destCoords !== null ? 1 : 0.55,
             },
           ]}
-          disabled={sourceCoords === null || destCoords === null}
+          disabled={sourceCoords === null || destCoords === null || savingLocation}
+          onPress={handleFindCoPassengers}
           activeOpacity={0.85}>
-          <Text style={styles.searchButtonText}>Search for Co-passengers</Text>
+          <Text style={styles.searchButtonText}>Find Co-passengers</Text>
         </TouchableOpacity>
+
+        {/* Saving location overlay */}
+        {savingLocation && (
+          <View style={styles.savingOverlay}>
+            <View style={[styles.savingCard, { backgroundColor: cardBg }]}>
+              <ActivityIndicator size="large" color={colors.tint} />
+              <Text style={[styles.savingText, { color: colors.text }]}>Saving location…</Text>
+            </View>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -607,6 +702,26 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   searchButtonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  savingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 14,
+  },
+  savingCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 16,
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
+  },
+  savingText: { fontSize: 16, fontWeight: '600' },
   femaleToggleCard: {
     borderRadius: 14,
     paddingHorizontal: 16,

@@ -15,3 +15,13 @@ export const updateJourneyMetadataSchema = z.object({
 });
 
 export type UpdateJourneyMetadataInput = z.infer<typeof updateJourneyMetadataSchema>;
+
+// Schema for POST /active-user — userId comes from the JWT, not the body
+export const upsertActiveUserSchema = z.object({
+  isActive: z.boolean().default(true),
+  source: LocationSchema,
+  destination: LocationSchema,
+});
+
+export type UpsertActiveUserInput = z.infer<typeof upsertActiveUserSchema>;
+

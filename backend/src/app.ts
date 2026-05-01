@@ -4,6 +4,7 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { env } from "./config/env";
 import { dbHealthCheck } from "./database/connection";
+import { redisHealthCheck } from "./database/redis";
 import { errorHandler } from "./middlewares/error.middleware";
 import { requestLogger } from "./middlewares/logger.middleware";
 import router from "./routes";
@@ -37,7 +38,7 @@ app.use(requestLogger);
 
 // Health check
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok", db: dbHealthCheck() });
+  res.json({ status: "ok", db: dbHealthCheck(), redis: redisHealthCheck() });
 });
 
 // API routes

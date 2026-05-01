@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { Types } from "mongoose";
 import { ActiveUser } from "../models/activeUser.model";
 import { User } from "../models/user.model";
+import { generateJWT } from "../services/auth.service";
 import { updateJourneyMetadataSchema } from "../validators/activeUser.validator";
 import {
     createUserSchema,
@@ -16,7 +17,8 @@ export async function createUser(
   try {
     const body = createUserSchema.parse(req.body);
     const user = await User.create(body);
-    res.status(201).json({ data: user });
+    const token = generateJWT(String(user._id));
+    res.status(201).json({ data: user, token });
   } catch (err) {
     next(err);
   }
@@ -118,7 +120,12 @@ export async function getUserByPhone(
       return;
     }
     const user = await User.findOne({ phone }).lean();
-    res.json({ data: user });
+    if (!user) {
+      res.json({ data: null });
+      return;
+    }
+    const token = generateJWT(String(user._id));
+    res.json({ data: user, token });
   } catch (err) {
     next(err);
   }
