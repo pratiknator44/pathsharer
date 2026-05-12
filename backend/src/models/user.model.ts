@@ -1,4 +1,5 @@
 import { Document, Schema, Types, model } from "mongoose";
+import { ILocation, LocationSchema } from "./journey.model";
 
 export interface IUser extends Document {
   _id: Types.ObjectId;
@@ -6,7 +7,9 @@ export interface IUser extends Document {
   email?: string;
   phone: string;
   gender: "male" | "female";
+  expoPushToken?: string;
   lastLoggedInAt?: Date;
+  recentSearches: ILocation[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -44,6 +47,15 @@ const UserSchema = new Schema<IUser>(
     lastLoggedInAt: {
       type: Date,
       default: null,
+    },
+    expoPushToken: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+    recentSearches: {
+      type: [LocationSchema],
+      default: [],
     },
   },
   {

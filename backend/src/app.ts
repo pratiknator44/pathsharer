@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import path from "path";
 import { env } from "./config/env";
 import { dbHealthCheck } from "./database/connection";
 import { redisHealthCheck } from "./database/redis";
@@ -32,6 +33,9 @@ app.use(
 
 // Body parsing
 app.use(express.json({ limit: "100kb" }));
+
+// Serve uploaded images
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Request logging
 app.use(requestLogger);

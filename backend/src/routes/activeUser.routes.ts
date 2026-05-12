@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getNearbyUsers, upsertActiveUser } from "../controllers/activeUser.controller";
+import { deleteActiveUser, getNearbyUsers, upsertActiveUser } from "../controllers/activeUser.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
@@ -9,5 +9,6 @@ router.use(authMiddleware);
 
 router.get("/nearby", getNearbyUsers);
 router.post("/", upsertActiveUser);
+router.delete("/me", deleteActiveUser);
 
 export default router;

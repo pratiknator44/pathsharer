@@ -5,7 +5,10 @@ import React, { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 
 import { AuthProvider, useAuth } from '@/context/auth-context';
+import { SocketProvider } from '@/context/socket-context';
+import RideRequestOverlay from '@/components/ride-request-overlay';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { registerForNotifications } from '@/utils/notifications';
 
 export const unstable_settings = {
   anchor: '(auth)',
@@ -13,7 +16,7 @@ export const unstable_settings = {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isNewUser } = useAuth();
   const segments = useSegments();
   const router = useRouter();
   const [ready, setReady] = useState(false);
@@ -29,9 +32,9 @@ function RootLayoutNav() {
     if (!isAuthenticated && !inAuthGroup) {
       router.replace('/(auth)/login');
     } else if (isAuthenticated && inAuthGroup) {
-      router.replace('/(tabs)/user');
+      router.replace(isNewUser ? '/(tabs)/user' : '/(tabs)/sharer');
     }
-  }, [ready, isAuthenticated, segments]);
+  }, [ready, isAuthenticated, isNewUser, segments]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -39,16 +42,26 @@ function RootLayoutNav() {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        <Stack.Screen name="chat/[userId]" options={{ headerShown: false }} />
+        <Stack.Screen name="settings" options={{ headerShown: false }} />
+        <Stack.Screen name="about" options={{ headerShown: false }} />
       </Stack>
+      <RideRequestOverlay />
       <StatusBar style="auto" />
     </ThemeProvider>
   );
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    registerForNotifications();
+  }, []);
+
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <SocketProvider>
+        <RootLayoutNav />
+      </SocketProvider>
     </AuthProvider>
   );
 }

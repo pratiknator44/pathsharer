@@ -1,10 +1,14 @@
 import { Router } from "express";
-import { createUser, getUser, getUserByPhone, updateJourneyMetadata, updateUser } from "../controllers/user.controller";
+import { createUser, deleteCurrentUser, getUser, getUserByPhone, updateJourneyMetadata, updateUser, getRecentSearches, addRecentSearch } from "../controllers/user.controller";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
 
 router.post("/", createUser);
 router.get("/by-phone", getUserByPhone);
+router.get("/me/recent-searches", authMiddleware, getRecentSearches);
+router.post("/me/recent-searches", authMiddleware, addRecentSearch);
+router.delete("/me", authMiddleware, deleteCurrentUser);
 router.get("/:id", getUser);
 router.patch("/:id", updateUser);
 router.post("/journey-metadata", updateJourneyMetadata);

@@ -101,3 +101,33 @@ export async function getNearbyUsers(
     next(err);
   }
 }
+
+/**
+ * DELETE /api/v1/active-users/me
+ * Requires: Authorization: Bearer <token>
+ *
+ * Marks the user as inactive in MongoDB and removes their Redis entry
+ * so they no longer appear in co-passenger searches.
+ */
+export async function deleteActiveUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userId = req.userId as string;
+
+    await ActiveUser.findOneAndUpdate(
+      { userId: new Types.ObjectId(userId) },
+      { $set: { isActive: false } }
+    ).lean();
+
+    redisClient
+      .del(`active-user:${userId}`)
+      .catch((err) => console.error("[Redis] Failed to delete active user key:", err));
+
+    res.status(200).json({ message: "Active user entry removed" });
+  } catch (err) {
+    next(err);
+  }
+}

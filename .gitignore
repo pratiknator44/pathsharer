@@ -1,93 +1,58 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# ─── Dependencies ────────────────────────────────────────────────────────────
+# Dependency directories
 node_modules/
-.pnp
-.pnp.js
+backend/node_modules/
+frontend/node_modules/
 
-# ─── Build outputs ───────────────────────────────────────────────────────────
-dist/
-build/
-out/
-lib/
-
-# ─── TypeScript ──────────────────────────────────────────────────────────────
-*.tsbuildinfo
-*.js.map
-
-# ─── Environment files ───────────────────────────────────────────────────────
-.env
-.env.local
-.env.*.local
-.env.development
-.env.test
-.env.production
-# Keep .env.example committed as a template
-!.env.example
-
-# ─── Logs ────────────────────────────────────────────────────────────────────
-logs/
+# Logs
+logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-# ─── Runtime / OS ────────────────────────────────────────────────────────────
-.DS_Store
-Thumbs.db
-*.pem
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
 
-# ─── Editor ──────────────────────────────────────────────────────────────────
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/launch.json
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Optional npm cache directory
+.npm
 
-# ─── Node.js / Backend ───────────────────────────────────────────────────────
-backend/node_modules/
-backend/dist/
-backend/build/
-backend/*.tsbuildinfo
+# Optional eslint cache
+.eslintcache
 
-# ─── React Native / Expo (Frontend) ─────────────────────────────────────────
-frontend/node_modules/
-frontend/.expo/
-frontend/dist/
-frontend/web-build/
-frontend/.metro-health-check*
-frontend/expo-env.d.ts
+# dotenv environment variables file
+.env
+.env.test
+.env.local
 
-# Expo generated native folders
-/ios
-/android
+# Expo / React Native frontend specific
 .expo/
-web-build/
-expo-env.d.ts
-
-# Metro bundler
-.metro-health-check*
-
-# Native signing / credentials
+dist/
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
 *.orig.*
-.kotlin/
+frontend/dist/
+frontend/.expo/
+frontend/android/
+frontend/ios/
 
-# ─── Testing ─────────────────────────────────────────────────────────────────
-coverage/
-.nyc_output/
+# TypeScript/Backend build files
+backend/dist/
+backend/build/
 
-# ─── Misc ────────────────────────────────────────────────────────────────────
-app-example
-.cache/
+# Uploads
+uploads/
+backend/uploads/
+frontend/uploads/
+
+# OS / IDE / Editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo

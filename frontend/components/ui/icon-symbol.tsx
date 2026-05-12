@@ -23,6 +23,7 @@ const MAPPING = {
   'gearshape.fill': 'settings',
   'pencil': 'edit',
   'camera.fill': 'photo-camera',
+  'bubble.left.and.bubble.right.fill': 'chat',
 } as IconMapping;
 
 /**

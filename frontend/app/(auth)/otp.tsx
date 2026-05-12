@@ -83,7 +83,8 @@ export default function OtpScreen() {
         console.log("New user - proceeding to registration");
       }
 
-      signIn(phone ?? '');
+      const isNew = !json.data;
+      signIn(phone ?? '', isNew);
     } catch (err: any) {
       Alert.alert('Error', err?.message ?? 'Could not verify. Please try again.');
     } finally {

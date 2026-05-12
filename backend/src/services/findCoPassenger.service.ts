@@ -103,5 +103,10 @@ export async function findUsersByCoords(
     }
   }
 
+  // Sort most-recently-active first
+  nearby.sort(
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  );
+
   return nearby;
 }

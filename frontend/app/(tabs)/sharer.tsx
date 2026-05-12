@@ -144,6 +144,9 @@ export default function SharerScreen() {
   // API call state
   const [savingLocation, setSavingLocation] = useState(false);
 
+  // Recent searches from backend
+  const [recentSearches, setRecentSearches] = useState<Array<{ name: string; coordinates: [number, number] }>>([]);
+
   async function handleFindCoPassengers() {
     if (sourceCoords === null || destCoords === null) return;
 
@@ -252,6 +255,24 @@ export default function SharerScreen() {
 
   useEffect(() => { requestLocation(); }, []); // mount-only
 
+  useEffect(() => {
+    async function loadRecentSearches() {
+      const token = await getAuthToken();
+      if (!token) return;
+      try {
+        const res = await fetch(`${API_URL}/users/me/recent-searches`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        const body = await res.json();
+        setRecentSearches(body.data ?? []);
+      } catch {
+        // silent fail
+      }
+    }
+    loadRecentSearches();
+  }, []);
+
   // Auto-fetch route when both coords are ready
   useEffect(() => {
     if (sourceCoords === null || destCoords === null) return;
@@ -314,6 +335,7 @@ export default function SharerScreen() {
     setSourceSuggestions([]);
     setShowSourceDropdown(false);
     Keyboard.dismiss();
+    saveRecentSearch(s.formatted, [s.lon, s.lat]);
   }
 
   function selectDest(s: Suggestion) {
@@ -322,6 +344,7 @@ export default function SharerScreen() {
     setDestSuggestions([]);
     setShowDestDropdown(false);
     Keyboard.dismiss();
+    saveRecentSearch(s.formatted, [s.lon, s.lat]);
   }
 
   function useGpsAsSource() {
@@ -340,6 +363,38 @@ export default function SharerScreen() {
     setDestSuggestions([]);
     setShowDestDropdown(false);
     Keyboard.dismiss();
+  }
+
+  async function saveRecentSearch(name: string, coordinates: [number, number]) {
+    const token = await getAuthToken();
+    if (!token) return;
+    fetch(`${API_URL}/users/me/recent-searches`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ name, coordinates }),
+    }).then((res) => {
+      if (res.ok) {
+        setRecentSearches((prev) => {
+          const filtered = prev.filter((r) => r.name !== name);
+          return [{ name, coordinates }, ...filtered].slice(0, 5);
+        });
+      }
+    }).catch(() => {});
+  }
+
+  function handleSwap() {
+    const tmpText = sourceText;
+    const tmpCoords = sourceCoords;
+    setSourceText(destText);
+    setSourceCoords(destCoords);
+    setDestText(tmpText);
+    setDestCoords(tmpCoords);
+    setSourceSuggestions([]);
+    setDestSuggestions([]);
+    setShowSourceDropdown(false);
+    setShowDestDropdown(false);
+    setRoutePoints([]);
+    setDistanceKm(null);
   }
 
   function handleOpenSettings() {
@@ -422,6 +477,14 @@ export default function SharerScreen() {
       <View style={styles.overlay} pointerEvents="box-none">
         {/* Route input card */}
         <View style={[styles.routeCard, { backgroundColor: cardBg, shadowColor: colors.text }]}>
+          {/* Swap button — absolutely positioned on the right, vertically centred */}
+          <TouchableOpacity
+            style={[styles.swapBtn, { backgroundColor: colors.tint }]}
+            onPress={handleSwap}
+            activeOpacity={0.75}>
+            <Text style={styles.swapIcon}>⇅</Text>
+          </TouchableOpacity>
+
           {/* Source row */}
           <View style={styles.routeRow}>
             <View style={[styles.dot, { backgroundColor: '#4CAF50' }]} />
@@ -515,6 +578,26 @@ export default function SharerScreen() {
                 </View>
               </View>
             </TouchableOpacity>
+            {/* Recent searches — shown when text is empty */}
+            {sourceText.trim().length < 2 && recentSearches.length > 0 && (
+              <>
+                <View style={[styles.suggSectionHeader, { borderTopColor: suggDivider, borderTopWidth: StyleSheet.hairlineWidth }]}>
+                  <Text style={[styles.suggSectionLabel, { color: colors.icon }]}>Recent</Text>
+                </View>
+                {recentSearches.map((r, i) => (
+                  <TouchableOpacity
+                    key={`recent-src-${i}`}
+                    style={[styles.suggItem, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: suggDivider }]}
+                    onPress={() => selectSource({ place_id: `recent-${i}`, formatted: r.name, lat: r.coordinates[1], lon: r.coordinates[0] })}
+                    activeOpacity={0.7}>
+                    <View style={styles.suggRow}>
+                      <Text style={[styles.suggHistIcon, { color: colors.icon }]}>🕐</Text>
+                      <Text style={[styles.suggText, { color: colors.text }]} numberOfLines={1}>{r.name}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </>
+            )}
             {/* API suggestions */}
             {sourceLoading && sourceSuggestions.length === 0 && (
               <View style={[styles.suggItem, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: suggDivider }]}>
@@ -555,6 +638,26 @@ export default function SharerScreen() {
                 </View>
               </View>
             </TouchableOpacity>
+            {/* Recent searches — shown when text is empty */}
+            {destText.trim().length < 2 && recentSearches.length > 0 && (
+              <>
+                <View style={[styles.suggSectionHeader, { borderTopColor: suggDivider, borderTopWidth: StyleSheet.hairlineWidth }]}>
+                  <Text style={[styles.suggSectionLabel, { color: colors.icon }]}>Recent</Text>
+                </View>
+                {recentSearches.map((r, i) => (
+                  <TouchableOpacity
+                    key={`recent-dst-${i}`}
+                    style={[styles.suggItem, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: suggDivider }]}
+                    onPress={() => selectDest({ place_id: `recent-${i}`, formatted: r.name, lat: r.coordinates[1], lon: r.coordinates[0] })}
+                    activeOpacity={0.7}>
+                    <View style={styles.suggRow}>
+                      <Text style={[styles.suggHistIcon, { color: colors.icon }]}>🕐</Text>
+                      <Text style={[styles.suggText, { color: colors.text }]} numberOfLines={1}>{r.name}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </>
+            )}
             {/* API suggestions */}
             {destLoading && destSuggestions.length === 0 && (
               <View style={[styles.suggItem, { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: suggDivider }]}>
@@ -643,7 +746,9 @@ const styles = StyleSheet.create({
   routeCard: {
     borderRadius: 16,
     padding: 14,
+    paddingRight: 50,
     marginBottom: 6,
+    overflow: 'visible',
     shadowOpacity: 0.12,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 3 },
@@ -662,6 +767,23 @@ const styles = StyleSheet.create({
   rowSpinner: { marginLeft: 4 },
   connectorRow: { paddingLeft: 5, paddingVertical: 3 },
   connector: { width: 2, height: 18, borderRadius: 1 },
+  swapBtn: {
+    position: 'absolute',
+    right: 10,
+    top: '50%',
+    marginTop: -15,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  swapIcon: { color: '#fff', fontSize: 16, fontWeight: '700', lineHeight: 18 },
   suggBox: {
     borderRadius: 12,
     borderWidth: 1,
@@ -678,6 +800,9 @@ const styles = StyleSheet.create({
   suggTextWrap: { flex: 1 },
   suggText: { fontSize: 14, lineHeight: 20 },
   suggSub: { fontSize: 11, marginTop: 1 },
+  suggSectionHeader: { paddingHorizontal: 14, paddingVertical: 6 },
+  suggSectionLabel: { fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
+  suggHistIcon: { fontSize: 13, width: 20 },
   routeInfoRow: {
     flexDirection: 'row',
     alignItems: 'center',
