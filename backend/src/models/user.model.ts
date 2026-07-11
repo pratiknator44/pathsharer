@@ -36,7 +36,8 @@ const UserSchema = new Schema<IUser>(
       required: true,
       unique: true,
       trim: true,
-      match: [/^\+?[1-9]\d{6,14}$/, "Phone must be in E.164 format"],
+      // Accept real E.164 numbers OR the web-guest placeholder pattern (000000000X)
+      match: [/^(\+?[1-9]\d{6,14}|0{9}\d+)$/, "Phone must be in E.164 format or a web-guest placeholder"],
     },
     gender: {
       type: String,

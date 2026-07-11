@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-
-const PRIVATE_JWT_KEY = "kamehameha!@#";
+import { env } from "../config/env";
 
 // Extend Express Request so downstream handlers can read req.userId
 declare global {
@@ -27,7 +26,7 @@ export function authMiddleware(
   const token = authHeader.slice(7); // strip "Bearer "
 
   try {
-    const payload = jwt.verify(token, PRIVATE_JWT_KEY) as { userId: string };
+    const payload = jwt.verify(token, env.JWT_SECRET) as { userId: string };
     req.userId = payload.userId;
     next();
   } catch {

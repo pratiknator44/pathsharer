@@ -6,10 +6,11 @@ import { User } from "../models/user.model";
 import { generateJWT } from "../services/auth.service";
 import { updateJourneyMetadataSchema } from "../validators/activeUser.validator";
 import {
-    createUserSchema,
-    LocationSchema,
-    updateUserSchema,
+  createUserSchema,
+  LocationSchema,
+  updateUserSchema,
 } from "../validators/user.validator";
+import nameGenerator from "../utils/name-generator";
 
 export async function createUser(
   req: Request,
@@ -18,8 +19,13 @@ export async function createUser(
 ): Promise<void> {
   try {
     const body = createUserSchema.parse(req.body);
-    const user = await User.create(body);
+
+    // If name is not provided, generate a random name
+    const name = body.name ?? nameGenerator();
+
+    const user = await User.create({ ...body, name });
     const token = generateJWT(String(user._id));
+
     res.status(201).json({ data: user, token });
   } catch (err) {
     next(err);
@@ -90,7 +96,7 @@ export async function updateJourneyMetadata(
 ): Promise<void> {
   try {
     const body = updateJourneyMetadataSchema.parse(req.body);
-    
+
     const metadata = await ActiveUser.findOneAndUpdate(
       { userId: new Types.ObjectId(body.userId) },
       {

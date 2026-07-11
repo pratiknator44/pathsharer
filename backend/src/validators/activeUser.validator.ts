@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { string, z } from "zod";
 
 const LocationSchema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -12,6 +12,7 @@ export const updateJourneyMetadataSchema = z.object({
   isActive: z.boolean(),
   source: LocationSchema,
   destination: LocationSchema,
+  name: z.string().optional()
 });
 
 export type UpdateJourneyMetadataInput = z.infer<typeof updateJourneyMetadataSchema>;

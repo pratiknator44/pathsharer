@@ -1,18 +1,18 @@
 import * as Location from 'expo-location';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Keyboard,
-    Linking,
-    Platform,
-    StyleSheet,
-    Switch,
-    Text,
-    TextInput,
-    ToastAndroid,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Keyboard,
+  Linking,
+  Platform,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import MapView, { Polyline, UrlTile } from 'react-native-maps';
 import { useRouter } from 'expo-router';
@@ -183,7 +183,7 @@ export default function SharerScreen() {
       }
 
       // 1. When 200 is received, send the coordinates to /nearby api call
-      const nearbyRes = await fetch(`${API_URL}/active-users/nearby?lng=${sourceCoords.longitude}&lat=${sourceCoords.latitude}`, {
+      const nearbyRes = await fetch(`${API_URL}/active-users/nearby?srcLng=${sourceCoords.longitude}&srcLat=${sourceCoords.latitude}&dstLng=${destCoords.longitude}&dstLat=${destCoords.latitude}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -379,7 +379,7 @@ export default function SharerScreen() {
           return [{ name, coordinates }, ...filtered].slice(0, 5);
         });
       }
-    }).catch(() => {});
+    }).catch(() => { });
   }
 
   function handleSwap() {
@@ -531,8 +531,8 @@ export default function SharerScreen() {
               placeholderTextColor={colors.icon}
               value={destText}
               onChangeText={handleDestChange}
-                onFocus={() => { setShowDestDropdown(true); setShowSourceDropdown(false); }}
-                onBlur={() => { setTimeout(() => setShowDestDropdown(false), 200); }}
+              onFocus={() => { setShowDestDropdown(true); setShowSourceDropdown(false); }}
+              onBlur={() => { setTimeout(() => setShowDestDropdown(false), 200); }}
               returnKeyType="search"
             />
             {destLoading && (

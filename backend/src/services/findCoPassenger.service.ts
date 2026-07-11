@@ -44,8 +44,10 @@ function isWithinRadius(
  * @returns    Array of nearby active users (may be empty)
  */
 export async function findUsersByCoords(
-  lng: number,
-  lat: number
+  userSrcLng: number,
+  userSrcLat: number,
+  userDstLng: number,
+  userDstLat: number,
 ): Promise<CachedActiveUser[]> {
   if (!redisClient.isOpen) {
     console.warn("[findCoPassenger] Redis is not connected — returning empty result.");
@@ -92,11 +94,13 @@ export async function findUsersByCoords(
       const [srcLng, srcLat] = user.source.coordinates;
       const [dstLng, dstLat] = user.destination.coordinates;
 
-      const sourceNear = isWithinRadius(lng, lat, srcLng, srcLat);
-      const destNear   = isWithinRadius(lng, lat, dstLng, dstLat);
+      const sourceNear = isWithinRadius(userSrcLng, userSrcLat, srcLng, srcLat);
 
-      if (sourceNear || destNear) {
-        nearby.push(user);
+      if (sourceNear) {
+        const destNear = isWithinRadius(userDstLng, userDstLat, dstLng, dstLat);
+        if (destNear) {
+          nearby.push(user);
+        }
       }
     } catch {
       // Skip malformed / stale entries silently

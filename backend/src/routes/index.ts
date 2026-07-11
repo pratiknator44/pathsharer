@@ -1,5 +1,6 @@
 import { Router } from "express";
 import activeUserRoutes from "./activeUser.routes";
+import authRoutes from "./auth.routes";
 import configRoutes from "./config.routes";
 import journeyRoutes from "./journey.routes";
 import messageRoutes from "./message.routes";
@@ -9,6 +10,7 @@ import userJourneyRoutes from "./userJourney.routes";
 
 const router = Router();
 
+router.use("/auth", authRoutes);
 router.use("/config", configRoutes);
 router.use("/users", userRoutes);
 router.use("/journeys", journeyRoutes);

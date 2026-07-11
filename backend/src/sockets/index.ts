@@ -7,9 +7,6 @@ import { registerJourneySocketHandlers } from "./journey.socket";
 import { registerNotificationSocketHandlers } from "./notification.socket";
 import { registerRideSocketHandlers } from "./ride.socket";
 
-// Keep in sync with auth.middleware.ts
-const PRIVATE_JWT_KEY = "kamehameha!@#";
-
 let _io: Server | null = null;
 
 export function initSocketIO(httpServer: HttpServer): Server {
@@ -27,7 +24,7 @@ export function initSocketIO(httpServer: HttpServer): Server {
     const token = socket.handshake.auth?.token as string | undefined;
     if (!token) return next(new Error("Authentication error: missing token"));
     try {
-      const payload = jwt.verify(token, PRIVATE_JWT_KEY) as { userId: string };
+      const payload = jwt.verify(token, env.JWT_SECRET) as { userId: string };
       socket.data.userId = payload.userId;
       next();
     } catch {
@@ -37,6 +34,11 @@ export function initSocketIO(httpServer: HttpServer): Server {
 
   _io.on("connection", (socket) => {
     console.log(`[Socket] Connected: ${socket.id} (user: ${socket.data.userId})`);
+    socket.join(`user:${socket.data.userId}`);
+
+    socket.onAny((event, ...args) => {
+      console.log(`[Socket Debug] Event: ${event} from ${socket.data.userId}`);
+    });
 
     registerJourneySocketHandlers(_io!, socket);
     registerChatSocketHandlers(_io!, socket);

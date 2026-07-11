@@ -15,7 +15,8 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "moduleResolution": "node10"
+    "moduleResolution": "node10",
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "src/**/*"

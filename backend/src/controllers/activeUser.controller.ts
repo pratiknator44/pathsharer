@@ -3,8 +3,9 @@ import { Types } from "mongoose";
 import { redisClient } from "../database/redis";
 import { ActiveUser } from "../models/activeUser.model";
 import { upsertActiveUserSchema } from "../validators/activeUser.validator";
+import nameGenerator from "../utils/name-generator";
 
-const REDIS_TTL_SECONDS = 60 * 60 * 24; // 24 hours
+const REDIS_TTL_SECONDS = 60 * 60; // 1 hour
 
 /**
  * POST /api/v1/active-users
@@ -28,14 +29,12 @@ export async function upsertActiveUser(
     }
 
     const body = upsertActiveUserSchema.parse(req.body);
-
+    const name = nameGenerator();
     const activeUser = await ActiveUser.findOneAndUpdate(
       { userId: new Types.ObjectId(userId) },
       {
         $set: {
-          isActive: body.isActive,
-          source: body.source,
-          destination: body.destination,
+          name,
           timestamp: new Date(),
         },
       },
@@ -49,6 +48,7 @@ export async function upsertActiveUser(
         REDIS_TTL_SECONDS,
         JSON.stringify({
           userId,
+          name,
           isActive: body.isActive,
           source: body.source,
           destination: body.destination,
@@ -75,26 +75,28 @@ export async function getNearbyUsers(
   next: NextFunction
 ): Promise<void> {
   try {
-    const { lng, lat } = req.query;
+    const { srcLng, srcLat, dstLng, dstLat } = req.query;
 
-    if (!lng || !lat || typeof lng !== "string" || typeof lat !== "string") {
+    if (!srcLng || !srcLat || typeof srcLng !== "string" || typeof srcLat !== "string" || !dstLng || !dstLat || typeof dstLng !== "string" || typeof dstLat !== "string") {
       res.status(400).json({ error: "Missing or invalid lng/lat query parameters" });
       return;
     }
 
-    const lngNum = parseFloat(lng);
-    const latNum = parseFloat(lat);
+    const srcLngNum = parseFloat(srcLng);
+    const srcLatNum = parseFloat(srcLat);
+    const dstLngNum = parseFloat(dstLng);
+    const dstLatNum = parseFloat(dstLat);
 
-    if (isNaN(lngNum) || isNaN(latNum)) {
+    if (isNaN(srcLngNum) || isNaN(srcLatNum) || isNaN(dstLngNum) || isNaN(dstLatNum)) {
       res.status(400).json({ error: "lng/lat must be valid numbers" });
       return;
     }
 
     const { findUsersByCoords } = await import("../services/findCoPassenger.service");
-    const nearbyUsers = await findUsersByCoords(lngNum, latNum);
+    const nearbyUsers = await findUsersByCoords(srcLngNum, srcLatNum, dstLngNum, dstLatNum);
 
     // Optionally exclude the current user from the results
-    const filteredUsers = nearbyUsers.filter(u => u.userId !== req.userId);
+    const filteredUsers = nearbyUsers.filter(u => String(u.userId) !== String(req.userId));
 
     res.status(200).json({ data: filteredUsers });
   } catch (err) {

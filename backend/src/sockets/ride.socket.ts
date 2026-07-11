@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { Server, Socket } from "socket.io";
+import { sendRingNotification } from "../services/push-notification.service";
 import { User } from "../models/user.model";
 import {
   RideConnectRequestPayload,
@@ -38,12 +39,28 @@ export function registerRideSocketHandlers(io: Server, socket: Socket): void {
         const roomSockets = await io.in(`user:${toUserId}`).fetchSockets();
         console.log(`[Ride] Room user:${toUserId} has ${roomSockets.length} socket(s)`);
 
+        if (roomSockets.length === 0) {
+          console.log(`[Ride] Target user ${toUserId} is offline. Auto-ignoring.`);
+          // Target is offline, immediately notify sender
+          socket.emit(SOCKET_EVENTS.RIDE_CONNECT_RESPONSE_RESULT, {
+            fromUserId: toUserId,
+            decision: "ignored",
+            requestId,
+          });
+          return;
+        }
+
         // Deliver to the target user's personal room
         io.to(`user:${toUserId}`).emit(SOCKET_EVENTS.RIDE_CONNECT_REQUEST_INCOMING, {
           fromUserId: userId,
           fromName,
           toDestination,
           requestId,
+        });
+
+        await sendRingNotification(toUserId, {
+          callerName: fromName,
+          journeyId: requestId,
         });
 
         console.log(`[Ride] Emitted RIDE_CONNECT_REQUEST_INCOMING to user:${toUserId}`);

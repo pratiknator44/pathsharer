@@ -4,6 +4,7 @@ import { ILocation, LocationSchema } from "./journey.model";
 export interface IActiveUser extends Document {
   _id: Types.ObjectId;
   userId: Types.ObjectId;
+  name?: string;
   isActive: boolean;
   source: ILocation;
   destination: ILocation;
@@ -19,6 +20,12 @@ const ActiveUserSchema = new Schema<IActiveUser>(
       ref: "User",
       required: true,
       unique: true,
+    },
+    name: {
+      type: String,
+      required: false,
+      trim: true,
+      default: ""
     },
     isActive: {
       type: Boolean,

@@ -11,6 +11,7 @@ import { RideConnectDecision, RideResponseResult, SOCKET_EVENTS } from '@/utils/
 
 interface UserData {
   userId: string;
+  name?: string;
   isActive: boolean;
   source: { name: string; coordinates: [number, number] };
   destination: { name: string; coordinates: [number, number] };
@@ -170,7 +171,7 @@ export default function PotentialCopassengersScreen() {
       <View style={[styles.userCard, { backgroundColor: cardBg, borderColor: border }]}>
         <View style={styles.userTitleRow}>
           <Text style={[styles.userTitle, { color: textColor }]}>
-            Passenger ID: {item.userId.substring(0, 8)}...
+            Passenger ID:123 {item.name?.substring(0, 8)}...
           </Text>
           <Text style={styles.timeText}>{getRelativeTime(item.updatedAt)}</Text>
         </View>
