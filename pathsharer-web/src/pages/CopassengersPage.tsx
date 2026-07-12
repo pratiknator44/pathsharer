@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { tokenStore } from '../api';
+import { getApiBaseUrl, tokenStore } from '../api';
 import { SOCKET_EVENTS, useSocket } from '../SocketContext';
 import { clearCurrentSearch, getCurrentSearch, setCurrentSearch } from '../currentSearchStore';
 
-const API_URL = process.env.REACT_APP_API_URL?.trim() || '/api/v1';
+const API_URL = getApiBaseUrl();
 const ACCEPTED_COPASSENGERS_KEY = 'pathsharer_accepted_copassengers';
 
 interface UserData {

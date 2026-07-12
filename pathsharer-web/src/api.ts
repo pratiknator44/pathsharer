@@ -7,8 +7,22 @@
  *   const result = await api.post('/journeys', { ... });
  */
 
-const BASE_URL =
-  process.env.REACT_APP_API_URL?.trim() || "/api/v1";
+export function getApiBaseUrl(): string {
+  const raw = process.env.REACT_APP_API_URL?.trim();
+  if (!raw) return "/api/v1";
+
+  const cleaned = raw.replace(/\/+$/, "");
+  if (!cleaned || cleaned === "/") return "/api/v1";
+  if (cleaned.endsWith("/api/v1")) return cleaned;
+  if (cleaned.endsWith("/api")) return `${cleaned}/v1`;
+  if (cleaned.endsWith("/v1")) return cleaned;
+  if (/^https?:\/\//i.test(cleaned) || cleaned.startsWith("//")) {
+    return `${cleaned}/api/v1`;
+  }
+  return `${cleaned}/v1`;
+}
+
+const BASE_URL = getApiBaseUrl();
 
 const TOKEN_KEY = "pathsharer_token";
 

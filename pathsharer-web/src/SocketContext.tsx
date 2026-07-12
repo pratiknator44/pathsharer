@@ -6,11 +6,11 @@ import React, {
   useState,
 } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { tokenStore } from './api';
+import { getApiBaseUrl, tokenStore } from './api';
 import { useAuth } from './AuthContext';
 import { playMessagePing } from './notificationService';
 
-const BASE_URL = (process.env.REACT_APP_API_URL?.trim() || '/api/v1').replace(/\/api\/v1\/?$/, '');
+const BASE_URL = getApiBaseUrl().replace(/\/api\/v1\/?$/, '');
 
 export const SOCKET_EVENTS = {
   CHAT_MESSAGE: 'chat:message',
