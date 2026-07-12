@@ -156,6 +156,7 @@ export default function SharerPage() {
     savedLocPerm ?? 'pending'
   );
   const [locationFetching, setLocationFetching] = useState(false);
+  const [locationError, setLocationError] = useState(false);
 
   // If previously granted, silently fetch GPS on mount (no dialog shown)
   useEffect(() => {
@@ -167,11 +168,16 @@ export default function SharerPage() {
           setGpsCoords(coords);
           setMapCenter(coords);
           setLocationFetching(false);
+          setLocationError(false);
           setSourceText('Your Location');
           setSourceCoords(coords);
         },
         () => {
           setLocationFetching(false);
+          // Reset so dialog shows again next time — device location may have been toggled off
+          localStorage.removeItem('locationPermission');
+          setLocationPermission('pending');
+          setLocationError(true);
         }
       );
     }
@@ -225,12 +231,14 @@ export default function SharerPage() {
     setLocationPermission('granted');
     localStorage.setItem('locationPermission', 'granted');
     setLocationFetching(true);
+    setLocationError(false);
     navigator.geolocation?.getCurrentPosition(
       (pos) => {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         setGpsCoords(coords);
         setMapCenter(coords);
         setLocationFetching(false);
+        setLocationError(false);
         // Autofill source with user location
         setSourceText('Your Location');
         setSourceCoords(coords);
@@ -239,6 +247,7 @@ export default function SharerPage() {
         setLocationFetching(false);
         setLocationPermission('denied');
         localStorage.setItem('locationPermission', 'denied');
+        setLocationError(true);
       }
     );
   }
@@ -494,6 +503,14 @@ export default function SharerPage() {
               {destLoading && <span className="input-spinner" />}
             </div>
           </div>
+
+          {/* Location error banner */}
+          {locationError && (
+            <div className="location-error-banner">
+              <span className="location-error-msg">📍 Couldn't get your location. Make sure Location is enabled on your device.</span>
+              <button className="location-retry-btn" onClick={handleEnableLocation}>Try Again</button>
+            </div>
+          )}
         </div>
 
         {/* Source dropdown */}

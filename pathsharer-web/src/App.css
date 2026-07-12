@@ -258,6 +258,41 @@ input, textarea { font-family: var(--font); }
 .route-input--fetching { border-color: var(--tint) !important; opacity: 0.8; cursor: wait; }
 .route-input--fetching::placeholder { color: var(--tint); font-style: italic; }
 
+/* Location error banner inside route card */
+.location-error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 59, 48, 0.10);
+  border: 1px solid rgba(255, 59, 48, 0.25);
+  animation: fadeIn 0.2s ease;
+}
+.location-error-msg {
+  font-size: 13px;
+  color: var(--red);
+  line-height: 1.4;
+  flex: 1;
+}
+.location-retry-btn {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: none;
+  background: var(--tint);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s;
+}
+.location-retry-btn:hover { background: var(--tint-dark); }
+.location-retry-btn:active { transform: scale(0.95); }
+
 .route-connector { padding: 3px 0 3px 5px; }
 .connector-line { width: 2px; height: 18px; background: var(--border); border-radius: 1px; margin-left: 4px; }
 
