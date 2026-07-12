@@ -15,10 +15,30 @@
   --border: #2e2e3e;
   --text: #f2f2f7;
   --sub: #8e8e9a;
+  --route-card-bg: rgba(26, 26, 36, 0.97);
+  --route-card-shadow: 0 8px 32px rgba(0,0,0,0.45);
   --font: 'Inter', -apple-system, sans-serif;
   --nav-h: 66px;
   --radius: 16px;
+  --bubble-theirs-bg: rgb(197, 218, 255);
 }
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #ffffff;
+    --surface: #f2f2f7;
+    --surface2: #e0e0eb;
+    --border: #d1d1e0;
+    --text: #1c1c1e;
+    --sub: #6e6e73;
+    --tint: #6C63FF;
+    --tint-dark: #5a52e0;
+    --green: #34c759;
+    --red: #ff3b30;
+    --route-card-bg: rgba(255, 255, 255, 0.95);
+    --route-card-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+  }
+}
+
 
 html, body, #root { height: 100%; width: 100%; overflow: hidden; }
 
@@ -101,7 +121,22 @@ input, textarea { font-family: var(--font); }
   padding: 32px;
   gap: 8px;
 }
-.empty-icon { font-size: 48px; }
+.empty-icon {
+    font-size: 48px;
+    animation: searchPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes searchPulse {
+    0%, 100% {
+        transform: scale(1) translateY(0);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: scale(1.15) translateY(-6px);
+        opacity: 1;
+    }
+}
 .empty-title { font-size: 18px; font-weight: 700; color: var(--text); }
 .empty-sub { font-size: 14px; color: var(--sub); text-align: center; }
 .error-text { color: var(--red); font-size: 15px; text-align: center; }
@@ -176,7 +211,7 @@ input, textarea { font-family: var(--font); }
   z-index: 400;
   display: flex;
   flex-direction: column;
-  padding: 52px 14px 16px;
+  padding: 16px 14px 16px;
   pointer-events: none;
 }
 .sharer-overlay > * { pointer-events: auto; }
@@ -184,11 +219,11 @@ input, textarea { font-family: var(--font); }
 
 /* Route card */
 .route-card {
-  background: rgba(26, 26, 36, 0.97);
+  background: var(--route-card-bg);
   border-radius: var(--radius);
   padding: 14px 50px 14px 14px;
   position: relative;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+  box-shadow: var(--route-card-shadow);
   backdrop-filter: blur(12px);
   margin-bottom: 6px;
 }
@@ -580,7 +615,7 @@ input, textarea { font-family: var(--font); }
   border-bottom-right-radius: 4px;
 }
 .bubble-theirs {
-  background: linear-gradient(135deg, #1a3d2b, #1f4a33);
+  background: var(--bubble-theirs-bg);
   border-bottom-left-radius: 4px;
 }
 .bubble-text { font-size: 15px; line-height: 1.45; color: var(--text); display: block; }

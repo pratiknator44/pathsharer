@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { tokenStore } from '../api';
 import { SOCKET_EVENTS, useSocket } from '../SocketContext';
-import { clearCurrentSearch, getCurrentSearch } from '../currentSearchStore';
+import { clearCurrentSearch, getCurrentSearch, setCurrentSearch } from '../currentSearchStore';
 
 const API_URL = process.env.REACT_APP_API_URL ?? 'http://localhost:5000/api/v1';
 const ACCEPTED_COPASSENGERS_KEY = 'pathsharer_accepted_copassengers';
@@ -14,6 +14,11 @@ interface UserData {
   source: { name: string; coordinates: [number, number] };
   destination: { name: string; coordinates: [number, number] };
   updatedAt: string;
+}
+
+interface RouteCoordinates {
+  lat: number;
+  lng: number;
 }
 
 type ConnectStatus = 'idle' | 'connecting' | 'accepted' | 'denied' | 'ignored';
@@ -61,18 +66,36 @@ export default function CopassengersPage() {
   const location = useLocation();
   const { socket, connectionError, sendRideConnectRequest } = useSocket();
 
-  const routeState = location.state as { users: UserData[]; sourceName: string; destName: string } | undefined;
+  const routeState = location.state as {
+    users: UserData[];
+    sourceName: string;
+    destName: string;
+    sourceCoords?: RouteCoordinates;
+    destCoords?: RouteCoordinates;
+  } | undefined;
   const savedSearch = useMemo(() => getCurrentSearch(), []);
   const state = routeState ?? savedSearch;
-  const users: UserData[] = useMemo(() => state?.users ?? [], [state?.users]);
-  const sourceName = state?.sourceName ?? '';
-  const destName = state?.destName ?? '';
-
+  const [users, setUsers] = useState<UserData[]>(() => state?.users ?? []);
+  const [sourceName, setSourceName] = useState(state?.sourceName ?? '');
+  const [destName, setDestName] = useState(state?.destName ?? '');
+  const [sourceCoords, setSourceCoords] = useState<RouteCoordinates | null>(() => state?.sourceCoords ?? null);
+  const [destCoords, setDestCoords] = useState<RouteCoordinates | null>(() => state?.destCoords ?? null);
   const [connectStatus, setConnectStatus] = useState<Record<string, ConnectStatus>>({});
   const [cancelling, setCancelling] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [statusText, setStatusText] = useState('Updating list...');
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const requestMap = useRef<Record<string, string>>({});
   const userNameMap = useRef<Record<string, string>>({});
+
+  useEffect(() => {
+    setUsers(state?.users ?? []);
+    setSourceName(state?.sourceName ?? '');
+    setDestName(state?.destName ?? '');
+    setSourceCoords(state?.sourceCoords ?? null);
+    setDestCoords(state?.destCoords ?? null);
+  }, [state?.users, state?.sourceName, state?.destName, state?.sourceCoords, state?.destCoords]);
 
   useEffect(() => {
     const accepted = getAcceptedCopassengers();
@@ -90,6 +113,77 @@ export default function CopassengersPage() {
       setConnectStatus((prev) => ({ ...nextStatus, ...prev }));
     }
   }, [users]);
+
+  useEffect(() => {
+    if (isRefreshing || !lastUpdatedAt) {
+      setStatusText('Updating list...');
+      return;
+    }
+
+    const updateStatus = () => {
+      const secondsAgo = Math.max(0, Math.floor((Date.now() - lastUpdatedAt) / 1000));
+      setStatusText(secondsAgo === 0 ? 'Updated just now' : `Updated ${secondsAgo} seconds ago`);
+    };
+
+    updateStatus();
+    const timerId = window.setInterval(updateStatus, 1000);
+    return () => window.clearInterval(timerId);
+  }, [isRefreshing, lastUpdatedAt]);
+
+  useEffect(() => {
+    if (!sourceCoords || !destCoords) return;
+
+    let cancelled = false;
+    const refreshNearbyUsers = async () => {
+      const token = tokenStore.get();
+      if (!token) return;
+
+      setIsRefreshing(true);
+      setStatusText('Updating list...');
+
+      try {
+        const nearbyRes = await fetch(
+          `${API_URL}/active-users/nearby?srcLng=${sourceCoords.lng}&srcLat=${sourceCoords.lat}&dstLng=${destCoords.lng}&dstLat=${destCoords.lat}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (!nearbyRes.ok) throw new Error(`Server error ${nearbyRes.status}`);
+
+        const nearbyBody = await nearbyRes.json();
+        const nextUsers = nearbyBody.data || [];
+
+        if (!cancelled) {
+          setUsers(nextUsers);
+          setLastUpdatedAt(Date.now());
+          setCurrentSearch({
+            users: nextUsers,
+            sourceName,
+            destName,
+            sourceCoords,
+            destCoords,
+          });
+        }
+      } catch {
+        if (!cancelled) {
+          setStatusText('Could not update list');
+        }
+      } finally {
+        if (!cancelled) {
+          setIsRefreshing(false);
+        }
+      }
+    };
+
+    void refreshNearbyUsers();
+    const intervalId = window.setInterval(() => {
+      void refreshNearbyUsers();
+    }, 10000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [sourceCoords?.lat, sourceCoords?.lng, destCoords?.lat, destCoords?.lng, sourceName, destName]);
 
   function showToast(msg: string) {
     setToast(msg);
@@ -151,6 +245,7 @@ export default function CopassengersPage() {
     setCancelling(true);
     try {
       const token = tokenStore.get();
+      // deregisters from redis
       await fetch(`${API_URL}/active-users/me`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token ?? ''}` },
@@ -193,13 +288,17 @@ export default function CopassengersPage() {
         </div>
       </div>
 
+      <div className="cop-status-row" style={{ marginBottom: 12, fontSize: 13, color: '#64748b' }}>
+        <span>{statusText}</span>
+      </div>
+
       {/* User cards */}
       <div className="cop-list">
         {users.length === 0 ? (
           <div className="centered-state">
-            <div className="empty-icon">😔</div>
-            <p className="empty-title">No co-passengers found</p>
-            <p className="empty-sub">Try expanding your route or check back later.</p>
+            <div className="empty-icon">🔍</div>
+            <p className="empty-title">Expanding search</p>
+            <p className="empty-sub">No one has registered for same route. We'll notify you when someone does.</p>
           </div>
         ) : (
           users.map((item) => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './AuthContext';
 import { SocketProvider, useSocket, SOCKET_EVENTS } from './SocketContext';
@@ -6,9 +6,11 @@ import SharerPage from './pages/SharerPage';
 import InboxPage from './pages/InboxPage';
 import ChatPage from './pages/ChatPage';
 import CopassengersPage from './pages/CopassengersPage';
+import About from './pages/About';
 import { playRideRequestRing, showRideRequestNotification } from './notificationService';
 import { CURRENT_SEARCH_CHANGED_EVENT, getCurrentSearch } from './currentSearchStore';
 import './App.css';
+import introImage from "./assets/intro.png";
 
 // Bottom tab bar — hidden on chat, copassengers screens
 function BottomNav() {
@@ -33,13 +35,20 @@ function BottomNav() {
 
   return (
     <nav className="bottom-nav">
+
+      <NavLink to="/about" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab--active' : ''}`}>
+        <span className="nav-icon-wrap">
+          <span className="nav-icon">ⓘ</span>
+        </span>
+        <span className="nav-label">About</span>
+      </NavLink>
       <NavLink to="/" end className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab--active' : ''}`}>
         <span className="nav-icon">🗺️</span>
         <span className="nav-label">Sharer</span>
       </NavLink>
       <NavLink to="/inbox" className={({ isActive }) => `nav-tab ${isActive ? 'nav-tab--active' : ''}`}>
         <span className="nav-icon-wrap">
-          <span className="nav-icon">💬</span>
+          <span className="nav-icon">✉️</span>
           {unreadCount > 0 && (
             <span className="nav-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
           )}
@@ -64,7 +73,7 @@ function GlobalOverlay() {
     if (!socket) return;
     const handleIncoming = (payload: any) => {
       setIncoming(payload);
-      const fromName = payload.fromName || `Passenger ${payload.fromUserId.substring(0,8)}`;
+      const fromName = payload.fromName || `Passenger ${payload.fromUserId.substring(0, 8)}`;
       playRideRequestRing();
       showRideRequestNotification({
         fromName,
@@ -88,7 +97,7 @@ function GlobalOverlay() {
       });
     }
     const userId = incoming.fromUserId;
-    const name = incoming.fromName || `Passenger ${incoming.fromUserId.substring(0,8)}`;
+    const name = incoming.fromName || `Passenger ${incoming.fromUserId.substring(0, 8)}`;
     setIncoming(null);
     if (decision === 'accepted') {
       navigate(`/chat/${userId}`, { state: { name } });
@@ -103,7 +112,7 @@ function GlobalOverlay() {
         </div>
         <h3 className="incoming-title">Connection Request!</h3>
         <p className="incoming-desc">
-          <strong>{incoming.fromName || `Passenger ${incoming.fromUserId.substring(0,8)}`}</strong> wants to connect to travel towards <strong>{incoming.toDestination}</strong>.
+          <strong>{incoming.fromName || `Passenger ${incoming.fromUserId.substring(0, 8)}`}</strong> wants to connect to travel towards <strong>{incoming.toDestination}</strong>.
         </p>
         <div className="incoming-actions">
           <button className="incoming-btn incoming-deny" onClick={() => handleDecision('denied')}>Decline</button>
@@ -135,18 +144,32 @@ function WelcomeOverlay() {
   return (
     <div className="welcome-overlay" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
       <div className="welcome-card">
-        <h2 id="welcome-title" className="welcome-title">Welcome to Pathsharer</h2>
+        <h2 id="welcome-title" className="welcome-title">Welcome to Pathsharer <br /><small>for Airport</small>
+        </h2>
         <p className="welcome-copy">
-          We&apos;re new and aspire to help you save costs on your conveyances.
+          An early phase open project to help make commuting more affordable.
         </p>
+        <div>
+          <img src={introImage} width="100%" />
+        </div>
+
         <p className="welcome-name">
-          You&apos;ll appear as <strong>{displayName}</strong> to other users.
+          This app doesn&apos;t save any of the user data, kindly lookout for safety.
         </p>
+
+        <p className="welcome-name">
+          You&apos;ll appear as <strong>{displayName}</strong> to others.
+        </p>
+
+        <p className="welcome-name">
+          <small>- Developer -</small>
+        </p>
+
         <button className="welcome-ok-btn" onClick={handleDismiss}>
-          OK
+          I Agree
         </button>
       </div>
-    </div>
+    </div >
   );
 }
 
@@ -188,6 +211,7 @@ function AppShell() {
         <Route path="/inbox" element={<InboxPage />} />
         <Route path="/chat/:userId" element={<ChatPage />} />
         <Route path="/copassengers" element={<CopassengersPage />} />
+        <Route path="/about" element={<About />} />
       </Routes>
       <WelcomeOverlay />
       <GlobalOverlay />

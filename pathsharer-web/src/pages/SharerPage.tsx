@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Polyline, useMap } from 'react-leaflet';
+import { useEffect, useRef, useState } from 'react';
+import { MapContainer, TileLayer, Polyline, useMap, Marker } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +23,20 @@ L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
+const sourceIcon = L.icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
+const destIcon = L.icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
 });
 
 type LatLng = { lat: number; lng: number };
@@ -85,16 +99,22 @@ async function fetchRoute(
 }
 
 // Inner component that can access the map instance
-function MapController({ center, routePoints }: { center: LatLng | null; routePoints: [number, number][] }) {
+function MapController({ center, routePoints, sourceCoords, destCoords }: { center: LatLng | null; routePoints: [number, number][]; sourceCoords: LatLng | null; destCoords: LatLng | null }) {
   const map = useMap();
 
   useEffect(() => {
-    if (routePoints.length > 1) {
+    if (sourceCoords && destCoords) {
+      const bounds = [
+        [sourceCoords.lat, sourceCoords.lng],
+        [destCoords.lat, destCoords.lng]
+      ];
+      map.fitBounds(bounds as any, { padding: [80, 40] });
+    } else if (routePoints.length > 1) {
       map.fitBounds(routePoints as any, { padding: [80, 40] });
     } else if (center) {
-      map.setView([center.lat, center.lng], 14, { animate: true });
+      map.setView([center.lat, center.lng], 16, { animate: true });
     }
-  }, [center, routePoints, map]);
+  }, [center, routePoints, sourceCoords, destCoords, map]);
 
   return null;
 }
@@ -318,14 +338,16 @@ export default function SharerPage() {
         users,
         sourceName: sourceText || 'Source',
         destName: destText || 'Destination',
+        sourceCoords: sourceCoords ? { lat: sourceCoords.lat, lng: sourceCoords.lng } : undefined,
+        destCoords: destCoords ? { lat: destCoords.lat, lng: destCoords.lng } : undefined,
       };
       setCurrentSearch(currentSearch);
 
-      if (users.length === 0) {
-        showToast('No co-passengers nearby 😔');
-      } else {
-        navigate('/copassengers', { state: currentSearch });
-      }
+      // if (users.length === 0) {
+      //   showToast('No co-passengers nearby');
+      // } else {
+      navigate('/copassengers', { state: currentSearch });
+      // }
     } catch (err: any) {
       showToast(err?.message ?? 'Could not save your location. Try again.');
     } finally {
@@ -373,7 +395,9 @@ export default function SharerPage() {
         attributionControl={false}
       >
         <TileLayer url={TILE_URL} maxZoom={19} />
-        <MapController center={mapCenter} routePoints={routePoints} />
+        <MapController center={mapCenter} routePoints={routePoints} sourceCoords={sourceCoords} destCoords={destCoords} />
+        {sourceCoords && <Marker position={[sourceCoords.lat, sourceCoords.lng]} icon={sourceIcon} />}
+        {destCoords && <Marker position={[destCoords.lat, destCoords.lng]} icon={destIcon} />}
         {routePoints.length > 1 && (
           <Polyline positions={routePoints} color="#6C63FF" weight={4} opacity={0.9} />
         )}

@@ -10,10 +10,17 @@ export interface CurrentSearchUser {
   updatedAt: string;
 }
 
+export interface CurrentSearchCoordinates {
+  lat: number;
+  lng: number;
+}
+
 export interface CurrentSearchState {
   users: CurrentSearchUser[];
   sourceName: string;
   destName: string;
+  sourceCoords?: CurrentSearchCoordinates;
+  destCoords?: CurrentSearchCoordinates;
 }
 
 export function getCurrentSearch(): CurrentSearchState | null {
