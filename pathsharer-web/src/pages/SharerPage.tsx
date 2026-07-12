@@ -149,23 +149,40 @@ export default function SharerPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
 
+  // Location permission dialog
+  // 'pending' = show dialog, 'granted' = have coords, 'denied' = user declined
+  const savedLocPerm = localStorage.getItem('locationPermission') as 'granted' | 'denied' | null;
+  const [locationPermission, setLocationPermission] = useState<'pending' | 'granted' | 'denied'>(
+    savedLocPerm ?? 'pending'
+  );
+  const [locationFetching, setLocationFetching] = useState(false);
+
+  // If previously granted, silently fetch GPS on mount (no dialog shown)
+  useEffect(() => {
+    if (savedLocPerm === 'granted') {
+      setLocationFetching(true);
+      navigator.geolocation?.getCurrentPosition(
+        (pos) => {
+          const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          setGpsCoords(coords);
+          setMapCenter(coords);
+          setLocationFetching(false);
+          setSourceText('Your Location');
+          setSourceCoords(coords);
+        },
+        () => {
+          setLocationFetching(false);
+        }
+      );
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Recent searches
   const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
 
   const srcTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dstTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Get GPS location
-  useEffect(() => {
-    navigator.geolocation?.getCurrentPosition(
-      (pos) => {
-        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        setGpsCoords(coords);
-        setMapCenter(coords);
-      },
-      () => { }
-    );
-  }, []);
 
   // Load recent searches
   useEffect(() => {
@@ -200,6 +217,34 @@ export default function SharerPage() {
   function showToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
+  }
+
+  // Location permission handlers
+  function handleEnableLocation() {
+    // Close dialog immediately and show loading in the source input
+    setLocationPermission('granted');
+    localStorage.setItem('locationPermission', 'granted');
+    setLocationFetching(true);
+    navigator.geolocation?.getCurrentPosition(
+      (pos) => {
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setGpsCoords(coords);
+        setMapCenter(coords);
+        setLocationFetching(false);
+        // Autofill source with user location
+        setSourceText('Your Location');
+        setSourceCoords(coords);
+      },
+      () => {
+        setLocationFetching(false);
+        setLocationPermission('denied');
+        localStorage.setItem('locationPermission', 'denied');
+      }
+    );
+  }
+
+  function handleDenyLocation() {
+    setLocationPermission('denied');
   }
 
   async function saveRecentSearch(name: string, coordinates: [number, number]) {
@@ -386,7 +431,7 @@ export default function SharerPage() {
 
   return (
     <div className="sharer-root">
-      {/* Map fills the background */}
+
       <MapContainer
         center={[mapCenter.lat, mapCenter.lng]}
         zoom={12}
@@ -415,15 +460,16 @@ export default function SharerPage() {
             <div className="input-wrap">
               <input
                 id="source-input"
-                className="route-input"
-                placeholder="From where?"
+                className={`route-input${locationFetching ? ' route-input--fetching' : ''}`}
+                placeholder={locationFetching ? 'Getting location…' : 'From where?'}
                 value={sourceText}
                 onChange={(e) => handleSourceChange(e.target.value)}
                 onFocus={() => { setShowSourceDrop(true); setShowDestDrop(false); }}
                 onBlur={() => setTimeout(() => setShowSourceDrop(false), 200)}
                 autoComplete="off"
+                disabled={locationFetching}
               />
-              {sourceLoading && <span className="input-spinner" />}
+              {(sourceLoading || locationFetching) && <span className="input-spinner" />}
             </div>
           </div>
 
@@ -568,6 +614,29 @@ export default function SharerPage() {
 
       {/* Toast */}
       {toast && <div className="toast-msg">{toast}</div>}
+
+      {/* Location Permission Dialog */}
+      {locationPermission === 'pending' && (
+        <div className="notification-permission-overlay" role="dialog" aria-modal="true" aria-labelledby="location-dialog-title">
+          <div className="notification-permission-card">
+            <div className="location-dialog-icon">📍</div>
+            <h2 id="location-dialog-title" className="notification-permission-title">
+              Allow Location Access
+            </h2>
+            <p className="notification-permission-copy">
+              PathSharer uses your location to autofill your starting point and centre the map on you — making it faster to share your ride.
+            </p>
+            <div className="notification-permission-actions">
+              {/* <button className="notification-secondary-btn" onClick={handleDenyLocation}>
+                Not now
+              </button> */}
+              <button className="notification-primary-btn" onClick={handleEnableLocation}>
+                Enable Location
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showNotificationPrompt && (
         <div className="notification-permission-overlay" role="dialog" aria-modal="true" aria-labelledby="notification-permission-title">
