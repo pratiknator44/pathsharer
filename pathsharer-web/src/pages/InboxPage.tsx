@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { tokenStore } from '../api';
 import { Conversation, SOCKET_EVENTS, useSocket } from '../SocketContext';
 
-const API_URL = process.env.REACT_APP_API_URL ?? 'http://localhost:5000/api/v1';
+const API_URL = process.env.REACT_APP_API_URL?.trim() || 'http://localhost:5000/api/v1';
 
 const AVATAR_COLORS = [
   '#6C63FF', '#e07b39', '#7b5ea7', '#3a9e6a',
