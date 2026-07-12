@@ -10,7 +10,7 @@ import { tokenStore } from './api';
 import { useAuth } from './AuthContext';
 import { playMessagePing } from './notificationService';
 
-const BASE_URL = (process.env.REACT_APP_API_URL?.trim() || 'http://localhost:5000/api/v1').replace(/\/api\/v1\/?$/, '');
+const BASE_URL = (process.env.REACT_APP_API_URL?.trim() || '/api/v1').replace(/\/api\/v1\/?$/, '');
 
 export const SOCKET_EVENTS = {
   CHAT_MESSAGE: 'chat:message',

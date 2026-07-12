@@ -8,7 +8,7 @@
  */
 
 const BASE_URL =
-  process.env.REACT_APP_API_URL?.trim() || "http://localhost:5000/api/v1";
+  process.env.REACT_APP_API_URL?.trim() || "/api/v1";
 
 const TOKEN_KEY = "pathsharer_token";
 

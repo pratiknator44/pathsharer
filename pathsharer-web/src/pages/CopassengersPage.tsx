@@ -4,7 +4,7 @@ import { tokenStore } from '../api';
 import { SOCKET_EVENTS, useSocket } from '../SocketContext';
 import { clearCurrentSearch, getCurrentSearch, setCurrentSearch } from '../currentSearchStore';
 
-const API_URL = process.env.REACT_APP_API_URL?.trim() || 'http://localhost:5000/api/v1';
+const API_URL = process.env.REACT_APP_API_URL?.trim() || '/api/v1';
 const ACCEPTED_COPASSENGERS_KEY = 'pathsharer_accepted_copassengers';
 
 interface UserData {

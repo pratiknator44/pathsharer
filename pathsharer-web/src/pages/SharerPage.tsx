@@ -11,7 +11,7 @@ import {
 } from '../notificationService';
 import { setCurrentSearch } from '../currentSearchStore';
 
-const API_URL = process.env.REACT_APP_API_URL?.trim() || 'http://localhost:5000/api/v1';
+const API_URL = process.env.REACT_APP_API_URL?.trim() || '/api/v1';
 const GEOAPIFY_KEY = process.env.REACT_APP_GEOAPIFY_KEY ?? 'd765840f666d4c9da4428757bee3d82e';
 
 const TILE_URL =

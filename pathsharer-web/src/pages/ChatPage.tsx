@@ -3,7 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { tokenStore } from '../api';
 import { ChatMessage, SOCKET_EVENTS, useSocket } from '../SocketContext';
 
-const API_URL = process.env.REACT_APP_API_URL?.trim() || 'http://localhost:5000/api/v1';
+const API_URL = process.env.REACT_APP_API_URL?.trim() || '/api/v1';
 const INITIAL_LOAD = 100;
 const LOAD_MORE_SIZE = 30;
 
