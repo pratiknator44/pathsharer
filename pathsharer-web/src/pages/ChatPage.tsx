@@ -169,7 +169,7 @@ export default function ChatPage() {
           <div className="centered-state"><div className="page-spinner" /></div>
         ) : (
           messages.map((msg) => {
-            const isMine = msg.sender._id !== otherUserId;
+            const isMine = msg?.sender?._id !== otherUserId;
             return (
               <div key={msg._id} className={`bubble-wrap ${isMine ? 'bubble-right' : 'bubble-left'}`}>
                 <div className={`bubble ${isMine ? 'bubble-mine' : 'bubble-theirs'}`}>

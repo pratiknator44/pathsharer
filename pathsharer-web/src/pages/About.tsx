@@ -2,6 +2,11 @@ import { useNavigate } from 'react-router-dom';
 
 export default function About() {
     const navigate = useNavigate();
+
+    function wipeLocalData() {
+        localStorage.clear();
+        alert("Local data cleared");
+    }
     return (
         <div className="about-page">
             <div className="about-card">
@@ -35,6 +40,8 @@ export default function About() {
                     <span>12 July 2026</span>
                 </div>
 
+                <button className="find-btn" style={{ border: "solid 1px black", backgroundColor: "red", color: "white" }} onClick={wipeLocalData}>Clear Local Data</button>
+                <br />
                 <button className="find-btn" style={{ border: "solid 1px black" }} onClick={() => navigate(-1)}>OK</button>
             </div>
         </div>
