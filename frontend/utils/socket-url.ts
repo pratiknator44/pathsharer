@@ -2,6 +2,7 @@ import { API_URL } from './api';
 
 /** Strip /api/v1 to get the raw server origin for Socket.IO */
 function resolveSocketUrl(): string {
+  console.log("API_URL = ", API_URL, SOCKET_URL);
   try {
     const url = new URL(API_URL);
     return `${url.protocol}//${url.host}`;

@@ -33,10 +33,10 @@ const SocketContext = createContext<SocketContextType>({
   isConnected: false,
   onlineUsers: new Set(),
   pendingRideRequest: null,
-  clearPendingRideRequest: () => {},
-  reconnect: async () => {},
+  clearPendingRideRequest: () => { },
+  reconnect: async () => { },
   hasUnreadMessages: false,
-  clearUnreadMessages: () => {},
+  clearUnreadMessages: () => { },
 });
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
@@ -76,7 +76,8 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       setIsConnected(false);
     });
     s.on('connect_error', (err) => {
-      console.warn('[Socket] Connection error:', err.message);
+      console.error("CONNECT ERROR");
+      console.error("message:", err);
     });
 
     s.on(SOCKET_EVENTS.CHAT_ONLINE_STATUS, ({ userId, online }: { userId: string; online: boolean }) => {
