@@ -13,6 +13,12 @@ import { setCurrentSearch } from '../currentSearchStore';
 
 const API_URL = getApiBaseUrl();
 const GEOAPIFY_KEY = process.env.REACT_APP_GEOAPIFY_KEY ?? 'd765840f666d4c9da4428757bee3d82e';
+const SOURCE_SUGGESTION_RADIUS_KM = Number.isFinite(Number.parseFloat(process.env.REACT_APP_SOURCE_SUGGESTION_RADIUS_KM ?? ''))
+  ? Number.parseFloat(process.env.REACT_APP_SOURCE_SUGGESTION_RADIUS_KM ?? '')
+  : 75;
+const DEST_SUGGESTION_RADIUS_KM = Number.isFinite(Number.parseFloat(process.env.REACT_APP_DEST_SUGGESTION_RADIUS_KM ?? ''))
+  ? Number.parseFloat(process.env.REACT_APP_DEST_SUGGESTION_RADIUS_KM ?? '')
+  : 250;
 
 const TILE_URL =
   'https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=' + GEOAPIFY_KEY;
@@ -50,22 +56,59 @@ type Suggestion = {
 
 type RecentSearch = { name: string; coordinates: [number, number] };
 
-async function geocodeAutocomplete(text: string): Promise<Suggestion[]> {
+function getDistanceKm(from: LatLng, to: LatLng) {
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const earthRadiusKm = 6371;
+  const dLat = toRad(to.lat - from.lat);
+  const dLng = toRad(to.lng - from.lng);
+  const lat1 = toRad(from.lat);
+  const lat2 = toRad(to.lat);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return earthRadiusKm * c;
+}
+
+function filterSuggestionsByRadius(suggestions: Suggestion[], center: LatLng | null, radiusKm: number | null) {
+  if (!center || radiusKm == null || !Number.isFinite(radiusKm)) return suggestions;
+  return suggestions.filter((suggestion) => {
+    const distanceKm = getDistanceKm(center, { lat: suggestion.lat, lng: suggestion.lon });
+    return distanceKm <= radiusKm;
+  });
+}
+
+async function geocodeAutocomplete(text: string, center: LatLng | null = null, radiusKm: number | null = null): Promise<Suggestion[]> {
   if (text.trim().length < 2) return [];
   const url =
     'https://api.geoapify.com/v1/geocode/autocomplete?text=' +
     encodeURIComponent(text) +
     '&limit=5&format=json&apiKey=' +
     GEOAPIFY_KEY;
+
+  const fetchSuggestions = async (applyRadius: boolean): Promise<Suggestion[]> => {
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      const suggestions = (data.results ?? []).map((r: any) => ({
+        place_id: r.place_id ?? String(Math.random()),
+        formatted: r.formatted ?? '',
+        lat: r.lat,
+        lon: r.lon,
+      }));
+      return applyRadius ? filterSuggestionsByRadius(suggestions, center, radiusKm) : suggestions;
+    } catch {
+      return [];
+    }
+  };
+
   try {
-    const res = await fetch(url);
-    const data = await res.json();
-    return (data.results ?? []).map((r: any) => ({
-      place_id: r.place_id ?? String(Math.random()),
-      formatted: r.formatted ?? '',
-      lat: r.lat,
-      lon: r.lon,
-    }));
+    const radiusFiltered = await fetchSuggestions(true);
+    if (radiusFiltered.length > 0 || !center || radiusKm == null || !Number.isFinite(radiusKm)) {
+      return radiusFiltered;
+    }
+
+    return fetchSuggestions(false);
   } catch {
     return [];
   }
@@ -286,7 +329,7 @@ export default function SharerPage() {
     if (text.trim().length < 2) { setSourceSuggestions([]); return; }
     srcTimer.current = setTimeout(async () => {
       setSourceLoading(true);
-      const results = await geocodeAutocomplete(text);
+      const results = await geocodeAutocomplete(text, gpsCoords, SOURCE_SUGGESTION_RADIUS_KM);
       setSourceLoading(false);
       setSourceSuggestions(results);
     }, 350);
@@ -321,7 +364,7 @@ export default function SharerPage() {
     if (text.trim().length < 2) { setDestSuggestions([]); return; }
     dstTimer.current = setTimeout(async () => {
       setDestLoading(true);
-      const results = await geocodeAutocomplete(text);
+      const results = await geocodeAutocomplete(text, gpsCoords, DEST_SUGGESTION_RADIUS_KM);
       setDestLoading(false);
       setDestSuggestions(results);
     }, 350);
