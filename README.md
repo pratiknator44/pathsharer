@@ -1,6 +1,6 @@
 <div align="center">
 
-#  <img src="https://pathsharer.com/logo192.png" height="10" width="10" /> PathSharer
+#  <img src="https://pathsharer.com/logo192.png" height="24" width="24" /> PathSharer
 ## 💨Beat pollution ✈️ Unfair Airport cab prices 💰 Save big
 ### This app is an MVP
 
