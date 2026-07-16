@@ -54,8 +54,8 @@ export async function webGuestLogin(
       });
     }
 
-    // 24-hour token — short-lived for a web MVP session.
-    const token = generateJWT(String(user._id), 1);
+    // 1000 days token for web MVP session.
+    const token = generateJWT(String(user._id), 1000);
 
     res.status(200).json({
       data: {
