@@ -1,12 +1,10 @@
 <div align="center">
 
-# 🚗 PathSharer
+#  <img src="https://pathsharer.com/logo192.png" height="10" width="10" /> PathSharer
 ## 💨Beat pollution ✈️ Unfair Airport cab prices 💰 Save big
 ### This app is an MVP
 
-<img src="https://img.shields.io/badge/Msuccess
-://img.shields.io/badge/React-Native-blue" />
-<img src="https://img.shields..io/badge/MongoDB-Database-brightgreen" />
+
 </div>
 
 ---
