@@ -8,7 +8,6 @@
  */
 
 export function getApiBaseUrl(): string {
-  console.log("REACT_APP_API_URL = ", process.env.REACT_APP_API_URL);
   const raw = process.env.REACT_APP_API_URL?.trim();
   if (!raw) return "/api/v1";
 
