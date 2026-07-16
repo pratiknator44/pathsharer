@@ -46,15 +46,15 @@ PathSharer helps people connect before the journey begins.
 ## ⚡ Core Features
 
 ### Overview
-👥 Find people travelling where you're going.
-🚫 Dont watch, dont judge. No data collection (regular wipe outs)
-🤖 No AI Involved
-🤑 Its FREE! No in-app or hidden purchases
+👥 Find people travelling where you're going.<br/>
+🚫 Dont watch, dont judge. No data collection (regular wipe outs)<br/>
+🤖 No AI Involved<br/>
+🤑 Its FREE! No in-app or hidden purchases<br/>
 
-Coming soon:
-♀️ Ladies only matching (coming soon)
-🕰️ Schedule based on airplanes
-🖥️ Better matching algorithms and routes
+Coming soon:<br/>
+♀️ Ladies only matching (coming soon)<br/>
+🕰️ Schedule based on airplanes<br/>
+🖥️ Better matching algorithms and routes<br/>
 
 ### 🔐 No Authentication
 No authentication required for MVP. Just goto https://pathsharer.com and get in queue
@@ -90,28 +90,26 @@ Powered by Socket.IO for real-time communication.
 
 ## 🔮 Vision
 
-PathSharer is not a ride-booking app.
-It is not a taxi platform.
-It is not another transportation marketplace.
-PathSharer is building a network of people whose journeys already overlap.
-The long-term vision is simple:
-
+PathSharer is not a ride-booking app.<br/>
+It is NOT a taxi platform.<br/>
+It is not another transportation marketplace.<br/>
+The long-term vision is simple:<br/>
 > Every empty seat is a missed connection and money saver.
 
 ## 📊 Why It Matters
 
 Every shared ride means:
 
-✅ Less traffic
-✅ Lower travel costs
-✅ Reduced emissions
-✅ New connections
-✅ Better journeys
+✅ Less traffic<br/>
+✅ Lower travel costs<br/>
+✅ Reduced emissions<br/>
+✅ New connections<br/>
+✅ Better journeys<br/>
 
 ---
 
 ## ❤️ Built With Purpose
-PathSharer is as an MVP.
+PathSharer is as an MVP.<br/>
 
 ---
 
