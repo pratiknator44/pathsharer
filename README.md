@@ -10,9 +10,9 @@
 ---
 
 ## 🌍 The Problem
--> Airports are safer to connect and find co-passengers
--> Taxis and Auto drivers asking for MORE money than the prices on app
--> Some state governments abolishing Bike Taxis to extract more GST in the name of safety
+-> Airports are safer to connect and find co-passengers <br/>
+-> Taxis and Auto drivers asking for MORE money than the prices on app <br/>
+-> Some state governments abolishing Bike Taxis to extract more GST in the name of safety <br/>
 
 ---
 
