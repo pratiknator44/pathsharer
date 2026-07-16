@@ -298,7 +298,7 @@ export default function CopassengersPage() {
           <div className="centered-state">
             <div className="empty-icon">🔍</div>
             <p className="empty-title">Expanding search</p>
-            <p className="empty-sub">No one has registered for same route. We'll notify you when someone does.</p>
+            <p className="empty-sub">No one has registered for same route. We'll notify you when someone does. Your request queues for upto 1 hour </p>
           </div>
         ) : (
           users.map((item) => {
