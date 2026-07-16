@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🚗 PathSharer (MVP release)
-
-### Don't just share the road. Share the journey.
+# 🚗 PathSharer
+## 💨Beat pollution ✈️ Unfair Airport cab prices 💰 Save big
+### This app is an MVP
 
 <img src="https://img.shields.io/badge/Msuccess
 ://img.shields.io/badge/React-Native-blue" />
@@ -21,11 +21,8 @@
 ## ✨ The Idea
 
 Imagine opening an app and discovering:
-
 > "Hey, someone else is going from Pune to Hinjawadi at 8 AM."
-
 Or:
-
 > "There are 3 people travelling your route tomorrow."
 
 Instead of driving separately...
@@ -43,21 +40,31 @@ That's PathSharer.
 ## 🎬 What Is PathSharer?
 
 PathSharer is a real-time co-passenger discovery platform that helps travelers find people moving along similar routes.
-
 ✈️ We focus mainly on Airport transfers for people living far OR traveling at night times when public transports are scarce
-
 PathSharer helps people connect before the journey begins.
 
 ---
 
 ## ⚡ Core Features
 
-### 🔐 Secure Authentication
+### Overview
+👥 Find people travelling where you're going.
+🚫 Dont watch, dont judge. No data collection (regular wipe outs)
+🤖 No AI Involved
+🤑 Its FREE! No in-app or hidden purchases
 
-No authentication required for MVP
+Coming soon:
+♀️ Ladies only matching (coming soon)
+🕰️ Schedule based on airplanes
+🖥️ Better matching algorithms and routes
+
+### 🔐 No Authentication
+No authentication required for MVP. Just goto https://pathsharer.com and get in queue
+
+### No Installation
+'Coz its a web app :D
+
 ### 📍 Ride Discovery
-
-Find people travelling where you're going.
 
 ### 👥 Potential Co-Passenger Matching
 
@@ -69,7 +76,7 @@ Communicate instantly before and during your trip.
 
 ### 🔔 Push Notifications
 
-Stay informed about new matches and messages.
+Stay informed about new matches and messages (on browser only).
 
 ### 📱 Mobile First
 
@@ -93,57 +100,20 @@ The long-term vision is simple:
 
 > Every empty seat is a missed connection and money saver.
 
----
-
-## 🗺 Roadmap
-
-### ✅ MVP
-
-- Authentication
-- Ride requests
-- Matching
-- Real-time chat
-- Notifications
-- Mobile app
-- Web app
-
-### 🚧 Next
-
-- User verification
-- Ride ratings
-- Profile improvements
-- Better route intelligence
-
-### 🌟 Future
-
-- Smart route recommendations
-- Corporate commuting
-- Groups & communities
-- Carbon footprint tracking
-- Shared travel subscriptions
-
----
-
 ## 📊 Why It Matters
 
 Every shared ride means:
 
 ✅ Less traffic
-
 ✅ Lower travel costs
-
 ✅ Reduced emissions
-
 ✅ New connections
-
 ✅ Better journeys
 
 ---
 
 ## ❤️ Built With Purpose
-
 PathSharer is as an MVP.
-
 
 ---
 
