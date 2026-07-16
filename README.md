@@ -1,33 +1,20 @@
 <div align="center">
 
-# 🚗 PathSharer
+# 🚗 PathSharer (MVP release)
 
 ### Don't just share the road. Share the journey.
 
 <img src="https://img.shields.io/badge/Msuccess
 ://img.shields.io/badge/React-Native-blue" />
 <img src="https://img.shields..io/badge/MongoDB-Database-brightgreen" />
-.shields.io/badge/Socket.IO-Realtime-black" />
-
 </div>
 
 ---
 
 ## 🌍 The Problem
-
-Every day, thousands of people travel the same routes.
-
-Same destination.
-
-Same timing.
-
-Same traffic.
-
-Same fuel costs.
-
-Yet they travel alone.
-
-PathSharer exists to change that.
+-> Airports are safer to connect and find co-passengers
+-> Taxis and Auto drivers asking for MORE money than the prices on app
+-> Some state governments abolishing Bike Taxis to extract more GST in the name of safety
 
 ---
 
@@ -44,13 +31,9 @@ Or:
 Instead of driving separately...
 
 You connect.
-
 You travel together.
-
 You save money.
-
 You reduce traffic.
-
 You make the journey a little less lonely.
 
 That's PathSharer.
@@ -61,13 +44,7 @@ That's PathSharer.
 
 PathSharer is a real-time co-passenger discovery platform that helps travelers find people moving along similar routes.
 
-Whether it's:
-
-- 🏢 Daily office commuting
-- 🎓 College travel
-- ✈️ Airport transfers
-- 🚘 Long-distance road trips
-- 🎉 Event travel
+✈️ We focus mainly on Airport transfers for people living far OR traveling at night times when public transports are scarce
 
 PathSharer helps people connect before the journey begins.
 
@@ -77,8 +54,7 @@ PathSharer helps people connect before the journey begins.
 
 ### 🔐 Secure Authentication
 
-Create an account and securely access the platform.
-
+No authentication required for MVP
 ### 📍 Ride Discovery
 
 Find people travelling where you're going.
@@ -107,141 +83,15 @@ Access PathSharer from your browser anytime.
 
 Powered by Socket.IO for real-time communication.
 
----
-
-## 🏗️ Architecture
-
-```text
-                    ┌────────────────────┐
-                    │    Mobile App      │
-                    │ React Native Expo  │
-                    └─────────┬──────────┘
-                              │
-                              │
-                    REST API + WebSockets
-                              │
-                              ▼
-
-                    ┌────────────────────┐
-                    │     Backend API    │
-                    │ Express + TS       │
-                    └───────┬────────────┘
-                            │
-          ┌─────────────────┼───────────────────┐
-          │                 │                   │
-          ▼                 ▼                   ▼
-
-     MongoDB           Redis Cache       Socket.IO
-
-          │
-          ▼
-
-  Expo Push Notifications
-
-          ▲
-          │
-
-  ┌────────────────────┐
-  │     Web Client     │
-  │   React + TS       │
-  └────────────────────┘
-```
-
----
-
-## 🛠 Tech Stack
-
-### Backend
-
-- Node.js
-- Express
-- TypeScript
-- MongoDB
-- Mongoose
-- Redis
-- Socket.IO
-- JWT
-- Zod
-- Multer
-
-### Mobile
-
-- React Native
-- Expo
-- TypeScript
-
-### Web
-
-- React
-- TypeScript
-
----
-
-## 📁 Monorepo Structure
-
-```text
-pathsharer/
-
-├── backend/
-│   ├── controllers/
-│   ├── routes/
-│   ├── models/
-│   ├── services/
-│   ├── sockets/
-│   └── validators/
-
-├── frontend/
-│   └── Expo Mobile Application
-
-├── pathsharer-web/
-│   └── React Web Application
-
-└── README.md
-```
-
----
-
-## 🚀 Running Locally
-
-### Backend
-
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-### Mobile
-
-```bash
-cd frontend
-npm install
-npx expo start
-```
-
-### Web
-
-```bash
-cd pathsharer-web
-npm install
-npm start
-```
-
----
-
 ## 🔮 Vision
 
 PathSharer is not a ride-booking app.
-
 It is not a taxi platform.
-
 It is not another transportation marketplace.
-
 PathSharer is building a network of people whose journeys already overlap.
-
 The long-term vision is simple:
 
-> Every empty seat is a missed connection.
+> Every empty seat is a missed connection and money saver.
 
 ---
 
@@ -292,13 +142,8 @@ Every shared ride means:
 
 ## ❤️ Built With Purpose
 
-PathSharer started as an MVP.
+PathSharer is as an MVP.
 
-Not to build another app.
-
-But to answer a simple question:
-
-> What if travelling together became the default?
 
 ---
 
@@ -307,7 +152,4 @@ But to answer a simple question:
 ### 🚗 Share Seats. Save Costs. Meet People.
 
 **PathSharer**
-
-*Because the best journeys are shared.*
-
 </div>
