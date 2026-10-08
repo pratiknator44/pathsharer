@@ -5,11 +5,26 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
 } from "../controllers/notification.controller";
+import { notifyAtAirport } from "../controllers/airport-location.controller";
+import {
+  deleteSubscription,
+  getPublicKey,
+  saveSubscription,
+} from "../controllers/web-push.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router();
 
+// Public endpoints
+// POST /api/v1/notifications/airport-location { userId, lat, lng, expoPushToken? }
+router.post("/airport-location", notifyAtAirport);
+router.get("/web-push/key", getPublicKey);
+
 router.use(authMiddleware);
+
+// Authenticated endpoints
+router.post("/web-push/subscription", saveSubscription);
+router.delete("/web-push/subscription", deleteSubscription);
 
 // GET /api/v1/notifications?before=<ISO date>
 router.get("/", getNotifications);

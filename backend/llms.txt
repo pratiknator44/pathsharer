@@ -1,0 +1,104 @@
+# PathSharer Backend — LLM Reference (`llms.txt`)
+
+> This file follows the [llmstxt.org](https://llmstxt.org) convention.
+> For the full agent guide, see [AGENTS.md](./AGENTS.md).
+
+## Service Summary
+
+**PathSharer Backend** is the Node.js + Express + Socket.IO server for the PathSharer platform.  
+It provides REST APIs for guest auth, active-user registration, co-passenger proximity search,
+1-on-1 chat history and image uploads, journey management, and push notifications.
+It also maintains persistent WebSocket connections for real-time chat, ride-connect requests,
+and online-presence tracking.
+
+- Port: 5000 (default)
+- API prefix: `/api/v1`
+- Health check: `GET /health`
+
+## Tech Stack
+
+Node.js + TypeScript · Express v5 · Socket.IO v4 · MongoDB + Mongoose v9 · Redis v5 · JWT · Expo Server SDK (push) · Multer · Zod · Helmet · express-rate-limit
+
+## Source Layout
+
+```
+src/
+  server.ts               ← entry point (DB, Redis, HTTP, Socket.IO)
+  app.ts                  ← Express setup: middleware + routes + error handler
+  config/env.ts           ← typed env config
+  database/
+    connection.ts         ← Mongoose helpers
+    redis.ts              ← Redis client helpers
+  middlewares/
+    auth.middleware.ts    ← JWT verify → req.userId
+    error.middleware.ts   ← central error handler
+    logger.middleware.ts  ← request logger
+  models/
+    user.model.ts         ← IUser (name, phone, gender, expoPushToken, recentSearches)
+    activeUser.model.ts   ← IActiveUser (userId, source, dest, isActive) — Redis-backed
+    message.model.ts      ← IMessage (sender, receiver, type, content, imageUrl, read)
+    journey.model.ts      ← IJourney
+    userJourney.model.ts  ← IUserJourney
+    notification.model.ts ← INotification
+  routes/                 ← one file per resource, mounted in routes/index.ts
+  controllers/            ← one file per resource
+  services/
+    findCoPassenger.service.ts  ← Redis-first nearby search, Mongo fallback
+    push-notification.service.ts← Expo push (sendRingNotification)
+    matching.service.ts         ← route-overlap algorithm
+    booking.service.ts          ← booking + fare
+    pricing.service.ts          ← per-km fare
+    auth.service.ts             ← generateJWT
+  sockets/
+    index.ts              ← initSocketIO, JWT auth middleware, room wiring
+    events.ts             ← SOCKET_EVENTS enum + payload interfaces
+    chat.socket.ts        ← send_message, typing, read, online tracking
+    ride.socket.ts        ← connect_request, connect_response
+    journey.socket.ts     ← journey room join/leave
+    notification.socket.ts← notification events
+  utils/
+    upload.ts             ← Multer disk config
+    name-generator.ts     ← random animal names for guests
+  validators/
+    activeUser.validator.ts ← Zod schema
+```
+
+## Key API Endpoints
+
+```
+POST   /api/v1/auth/web-guest              # auto-create guest (no auth)
+POST   /api/v1/active-users                # register as searching (auth)
+GET    /api/v1/active-users/nearby         # ?srcLng=&srcLat=&dstLng=&dstLat= (auth)
+DELETE /api/v1/active-users/me             # deregister (auth)
+GET    /api/v1/messages/conversations      # conversation list (auth)
+GET    /api/v1/messages/:otherUserId       # paginated history (auth)
+POST   /api/v1/messages/upload-image       # multipart image upload (auth)
+GET    /api/v1/users/me/recent-searches    # (auth)
+POST   /api/v1/users/me/recent-searches    # (auth)
+GET    /api/v1/config                      # public app metadata
+GET    /health                             # { status, db, redis }
+```
+
+## Key Socket.IO Events
+
+Client → Server: `chat:send_message`, `chat:typing`, `chat:read`,
+`ride:connect_request`, `ride:connect_response`, `journey:join_room`, `journey:leave_room`
+
+Server → Client: `chat:message`, `chat:message_read`, `chat:online_status`,
+`ride:connect_request_incoming`, `ride:connect_response_result`,
+`notification:new`, `notification:ring`, `error`
+
+## Key Facts for AI Agents
+
+- All Socket.IO connections authenticate via `{ auth: { token } }` in handshake.
+- Personal socket room name: `"user:{userId}"` — always emit to rooms, never socket IDs.
+- Redis key `active-user:{userId}` expires in 3600 s (1 hour); Redis is a soft dependency.
+- Guest phone placeholder pattern: `/^0{9}\d+$/` — do not change this regex.
+- Uploaded images stored in `../uploads/`, served at `/uploads/*`.
+- Guest user names are random (adjective + animal) and regenerate on each search.
+- CORS is `*` in dev, locked to same-origin in production.
+
+## Full Reference
+
+See **[AGENTS.md](./AGENTS.md)** for complete endpoint table, all Socket.IO event payloads,
+model schemas, Redis key map, env vars, auth middleware details, and conventions.

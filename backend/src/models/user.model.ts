@@ -8,6 +8,10 @@ export interface IUser extends Document {
   phone: string;
   gender: "male" | "female";
   expoPushToken?: string;
+  webPushSubscriptions: Array<{
+    endpoint: string;
+    keys: { p256dh: string; auth: string };
+  }>;
   lastLoggedInAt?: Date;
   recentSearches: ILocation[];
   createdAt: Date;
@@ -53,6 +57,21 @@ const UserSchema = new Schema<IUser>(
       type: String,
       default: null,
       trim: true,
+    },
+    webPushSubscriptions: {
+      type: [
+        new Schema(
+          {
+            endpoint: { type: String, required: true },
+            keys: {
+              p256dh: { type: String, required: true },
+              auth: { type: String, required: true },
+            },
+          },
+          { _id: false }
+        ),
+      ],
+      default: [],
     },
     recentSearches: {
       type: [LocationSchema],

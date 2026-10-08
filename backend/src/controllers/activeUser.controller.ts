@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { Types } from "mongoose";
 import { redisClient } from "../database/redis";
 import { ActiveUser } from "../models/activeUser.model";
+import { User } from "../models/user.model";
 import { upsertActiveUserSchema } from "../validators/activeUser.validator";
 import nameGenerator from "../utils/name-generator";
 
@@ -29,7 +30,9 @@ export async function upsertActiveUser(
     }
 
     const body = upsertActiveUserSchema.parse(req.body);
-    const name = nameGenerator();
+    const user = await User.findById(userId).select("name phone").lean();
+    const isWebGuest = user?.phone && /^0{9}\d+$/.test(user.phone);
+    const name = isWebGuest && user ? user.name : nameGenerator();
     const activeUser = await ActiveUser.findOneAndUpdate(
       { userId: new Types.ObjectId(userId) },
       {

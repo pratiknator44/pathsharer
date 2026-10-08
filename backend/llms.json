@@ -1,0 +1,71 @@
+{
+  "$schema": "https://llmstxt.org/schema.json",
+  "name": "PathSharer Backend",
+  "description": "Node.js + Express REST API and Socket.IO real-time server for PathSharer. Handles guest auth, active-user registration (Redis TTL), co-passenger proximity search, 1-on-1 chat, push notifications, and ride-connect request brokering.",
+  "version": "1.0.0",
+  "license": "ISC",
+  "author": "pratik",
+  "contact": "heypratik.js@gmail.com",
+  "stack": {
+    "runtime": "Node.js + TypeScript",
+    "framework": "Express v5",
+    "realtime": "Socket.IO v4",
+    "database": "MongoDB (Mongoose v9)",
+    "cache": "Redis v5",
+    "auth": "JWT (jsonwebtoken)",
+    "push": "Expo Server SDK",
+    "uploads": "Multer",
+    "validation": "Zod v4"
+  },
+  "entryPoints": {
+    "server": "src/server.ts",
+    "app": "src/app.ts",
+    "socketInit": "src/sockets/index.ts",
+    "socketEvents": "src/sockets/events.ts",
+    "envConfig": "src/config/env.ts"
+  },
+  "apiBase": "/api/v1",
+  "healthCheck": "GET /health",
+  "defaultPort": 5000,
+  "routes": [
+    { "method": "POST",   "path": "/auth/web-guest",                   "auth": false, "file": "src/routes/auth.routes.ts" },
+    { "method": "POST",   "path": "/active-users",                     "auth": true,  "file": "src/routes/activeUser.routes.ts" },
+    { "method": "GET",    "path": "/active-users/nearby",              "auth": true,  "file": "src/routes/activeUser.routes.ts" },
+    { "method": "DELETE", "path": "/active-users/me",                  "auth": true,  "file": "src/routes/activeUser.routes.ts" },
+    { "method": "GET",    "path": "/messages/conversations",           "auth": true,  "file": "src/routes/message.routes.ts" },
+    { "method": "GET",    "path": "/messages/:otherUserId",            "auth": true,  "file": "src/routes/message.routes.ts" },
+    { "method": "POST",   "path": "/messages/upload-image",            "auth": true,  "file": "src/routes/message.routes.ts" },
+    { "method": "DELETE", "path": "/messages/image",                   "auth": true,  "file": "src/routes/message.routes.ts" },
+    { "method": "GET",    "path": "/users/me/recent-searches",         "auth": true,  "file": "src/routes/user.routes.ts" },
+    { "method": "POST",   "path": "/users/me/recent-searches",         "auth": true,  "file": "src/routes/user.routes.ts" },
+    { "method": "DELETE", "path": "/users/me",                         "auth": true,  "file": "src/routes/user.routes.ts" },
+    { "method": "GET",    "path": "/notifications",                    "auth": true,  "file": "src/routes/notification.routes.ts" },
+    { "method": "POST",   "path": "/notifications/airport-location",   "auth": true,  "file": "src/routes/notification.routes.ts" },
+    { "method": "PATCH",  "path": "/notifications/read-all",           "auth": true,  "file": "src/routes/notification.routes.ts" },
+    { "method": "PATCH",  "path": "/notifications/:id/read",           "auth": true,  "file": "src/routes/notification.routes.ts" },
+    { "method": "DELETE", "path": "/notifications/:id",                "auth": true,  "file": "src/routes/notification.routes.ts" },
+    { "method": "GET",    "path": "/config",                           "auth": false, "file": "src/routes/config.routes.ts" }
+  ],
+  "socketEvents": {
+    "clientToServer": [
+      "chat:send_message",
+      "chat:typing",
+      "chat:read",
+      "ride:connect_request",
+      "ride:connect_response",
+      "journey:join_room",
+      "journey:leave_room"
+    ],
+    "serverToClient": [
+      "chat:message",
+      "chat:message_read",
+      "chat:online_status",
+      "ride:connect_request_incoming",
+      "ride:connect_response_result",
+      "notification:new",
+      "notification:ring",
+      "error"
+    ]
+  },
+  "agentGuide": "AGENTS.md"
+}

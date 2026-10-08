@@ -54,6 +54,29 @@ export async function getUser(
   }
 }
 
+export async function getCurrentDisplayName(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    if (/^0{9}\d+$/.test(user.phone) && /^user\d+$/i.test(user.name)) {
+      user.name = nameGenerator();
+      await user.save();
+    }
+
+    res.json({ data: { name: user.name } });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function updateUser(
   req: Request,
   res: Response,
