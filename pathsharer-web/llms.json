@@ -1,0 +1,38 @@
+{
+  "$schema": "https://llmstxt.org/schema.json",
+  "name": "PathSharer Web",
+  "description": "Real-time co-passenger discovery platform for airport transfers. Users set a source and destination, get registered as active, and can see / connect with other travelers on the same route — all without creating an account.",
+  "version": "1.0.0-alpha",
+  "license": "Private / Proprietary",
+  "homepage": "https://pathsharer.com",
+  "repository": "https://github.com/pratiknator44/pathsharer",
+  "contact": "heypratik.js@gmail.com",
+  "stack": {
+    "framework": "React 19 + TypeScript (Create React App)",
+    "routing": "React Router DOM v7",
+    "realtime": "Socket.IO client v4",
+    "maps": "Leaflet + react-leaflet v5",
+    "geocoding": "Geoapify REST API",
+    "styling": "Vanilla CSS"
+  },
+  "entryPoints": {
+    "source": "src/index.tsx",
+    "rootComponent": "src/App.tsx",
+    "styles": "src/App.css"
+  },
+  "routes": [
+    { "path": "/",              "file": "src/pages/SharerPage.tsx",       "description": "Map + route picker + Find Co-passengers button" },
+    { "path": "/copassengers",  "file": "src/pages/CopassengersPage.tsx", "description": "List of nearby active users, ride-connect flow" },
+    { "path": "/inbox",         "file": "src/pages/InboxPage.tsx",        "description": "Conversation list with unread counts" },
+    { "path": "/chat/:userId",  "file": "src/pages/ChatPage.tsx",         "description": "Real-time 1-on-1 chat" },
+    { "path": "/about",         "file": "src/pages/About.tsx",            "description": "App info + Clear Local Data" }
+  ],
+  "keyModules": {
+    "api":               "src/api.ts",
+    "authContext":       "src/AuthContext.tsx",
+    "socketContext":     "src/SocketContext.tsx",
+    "currentSearch":     "src/currentSearchStore.ts",
+    "notifications":     "src/notificationService.ts"
+  },
+  "agentGuide": "AGENTS.md"
+}

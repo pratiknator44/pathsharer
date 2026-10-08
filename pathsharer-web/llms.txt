@@ -1,0 +1,59 @@
+# PathSharer Web — LLM Reference (`llms.txt`)
+
+> This file follows the [llmstxt.org](https://llmstxt.org) convention.
+> For the full agent guide, see [AGENTS.md](./AGENTS.md).
+
+## App Summary
+
+**PathSharer** is a zero-account, real-time co-passenger finder for airport transfers.
+Open the app, pick a source and destination, tap "Find Co-passengers", and see nearby travelers going the same way. Send a connect request, chat, and split the cab fare.
+
+- URL: https://pathsharer.com
+- Version: v1.0.0 (alpha, released July 2026)
+- Contact: heypratik.js@gmail.com
+
+## Tech Stack
+
+React 19 + TypeScript · React Router v7 · Leaflet maps · Socket.IO v4 · Geoapify geocoding · Vanilla CSS · Node.js backend (../backend)
+
+## Source Layout
+
+```
+src/
+  index.tsx               ← entry point
+  App.tsx                 ← root (providers + router + global overlays)
+  App.css                 ← ALL CSS (single file)
+  api.ts                  ← fetch wrapper + guest auth helpers
+  AuthContext.tsx         ← auto-login via POST /auth/web-guest
+  SocketContext.tsx       ← Socket.IO + SOCKET_EVENTS enum
+  currentSearchStore.ts   ← localStorage store for active search
+  notificationService.ts  ← browser notifications + audio
+  pages/
+    SharerPage.tsx        → route "/"
+    CopassengersPage.tsx  → route "/copassengers"
+    InboxPage.tsx         → route "/inbox"
+    ChatPage.tsx          → route "/chat/:userId"
+    About.tsx             → route "/about"
+  components/
+    AirportReminderOverlay.tsx
+```
+
+## Key Facts for AI Agents
+
+- Guest-only: no user sign-up. `POST /api/v1/auth/web-guest` runs automatically on mount.
+- JWT stored in `localStorage` under key `pathsharer_token`.
+- All styles in one file: `src/App.css`. Do not add CSS modules or Tailwind.
+- No Redux. Cross-route state goes in `currentSearchStore.ts` or React context.
+- Socket.IO auth: token passed as `{ auth: { token } }` in `io()` options.
+- Bottom nav hidden on `/chat/*` routes.
+- CopassengersPage auto-refreshes nearby users every 10 seconds.
+
+## Full Reference
+
+See **[AGENTS.md](./AGENTS.md)** for:
+- Complete route table
+- All localStorage keys
+- All REST API endpoints
+- All Socket.IO events (emitted + received)
+- Environment variables
+- Running locally

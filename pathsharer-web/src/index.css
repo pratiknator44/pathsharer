@@ -19,6 +19,8 @@ html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: 
     border-radius: 16px;
     padding: 32px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    max-height:45rem;
+    overflow: auto;
 }
 
 .about-card h1 {
@@ -57,4 +59,42 @@ html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: 
 
 .about-section a:hover {
     color: #000;
+}
+
+.about-feature-section {
+    padding: 18px 0;
+    border-top: 1px solid #eee;
+}
+
+.about-feature-section h2 {
+    margin: 0 0 8px;
+    color: #161b22;
+    font-size: 1.1rem;
+}
+
+.about-feature-section p {
+    margin: 0 0 14px;
+    font-size: 0.95rem;
+}
+
+.install-instructions p {
+    margin: 10px 0;
+}
+
+.about-location-note {
+    padding: 12px;
+    border-left: 3px solid #e0a12d;
+    background: #fff8e8;
+    color: #55451f !important;
+}
+
+@media (max-width: 600px) {
+    .about-page {
+        padding: 20px 14px 88px;
+        overflow-y: auto;
+    }
+
+    .about-card {
+        padding: 22px 18px;
+    }
 }

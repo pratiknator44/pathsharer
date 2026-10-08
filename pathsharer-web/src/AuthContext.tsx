@@ -13,7 +13,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { GuestUser, tokenStore, userStore, webGuestLogin } from "./api";
+import { api, GuestUser, tokenStore, userStore, webGuestLogin } from "./api";
 
 // ---------------------------------------------------------------------------
 // Context shape
@@ -51,8 +51,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null);
       try {
         const res = await webGuestLogin();
+        const displayName = await api
+          .get<{ data: { name: string } }>("/users/me/display-name")
+          .then((result) => result.data.name)
+          .catch(() => res.data.name);
+        const authenticatedUser = { ...res.data, name: displayName };
+        userStore.set(authenticatedUser);
         if (!cancelled) {
-          setUser(res.data);
+          setUser(authenticatedUser);
         }
       } catch (err: unknown) {
         if (!cancelled) {

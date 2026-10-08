@@ -9,6 +9,7 @@ import CopassengersPage from './pages/CopassengersPage';
 import About from './pages/About';
 import { playRideRequestRing, showRideRequestNotification } from './notificationService';
 import { CURRENT_SEARCH_CHANGED_EVENT, getCurrentSearch } from './currentSearchStore';
+import { api } from './api';
 import './App.css';
 import introImage from "./assets/intro.png";
 
@@ -173,6 +174,92 @@ function WelcomeOverlay() {
   );
 }
 
+const AIRPORT_REMINDER_ENABLED_KEY = 'pathsharer_airport_reminder_enabled';
+const WEB_PUSH_ENABLED_KEY = 'pathsharer_web_push_enabled';
+
+function AirportLocationTracker() {
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user) return;
+
+    let watchId: number | null = null;
+    let lastSentAt = 0;
+    let lastCoords: { lat: number; lng: number } | null = null;
+
+    const startWatching = () => {
+      if (watchId !== null || localStorage.getItem(AIRPORT_REMINDER_ENABLED_KEY) !== 'true') return;
+      if (!navigator.geolocation) return;
+
+      watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+          const movedMeters = lastCoords
+            ? distanceMeters(lastCoords, coords)
+            : Number.POSITIVE_INFINITY;
+          if (Date.now() - lastSentAt < 120_000 || (lastCoords && movedMeters < 250)) return;
+
+          lastSentAt = Date.now();
+          lastCoords = coords;
+          api.post<{
+            nearby: boolean;
+            notificationQueued?: boolean;
+            airport?: { city: string };
+          }>('/notifications/airport-location', { ...coords, userId: user._id }).then((result) => {
+            if (
+              result.notificationQueued &&
+              result.airport &&
+              localStorage.getItem(WEB_PUSH_ENABLED_KEY) !== 'true' &&
+              'Notification' in window &&
+              Notification.permission === 'granted'
+            ) {
+              const notification = new Notification('Airport reminder', {
+                body: `Traveling to ${result.airport.city}? Tap to find copassengers now`,
+                icon: '/logo192.png',
+                tag: 'pathsharer-airport-reminder',
+              });
+              notification.onclick = () => {
+                window.focus();
+                window.location.assign('/');
+              };
+            }
+          }).catch(() => undefined);
+        },
+        () => undefined,
+        { enableHighAccuracy: false, maximumAge: 60_000, timeout: 20_000 }
+      );
+    };
+
+    const stopWatching = () => {
+      if (watchId !== null) navigator.geolocation?.clearWatch(watchId);
+      watchId = null;
+    };
+
+    const onEnabled = () => startWatching();
+    const onDisabled = () => stopWatching();
+    window.addEventListener('pathsharer:airport-reminders-enabled', onEnabled);
+    window.addEventListener('pathsharer:airport-reminders-disabled', onDisabled);
+    startWatching();
+
+    return () => {
+      stopWatching();
+      window.removeEventListener('pathsharer:airport-reminders-enabled', onEnabled);
+      window.removeEventListener('pathsharer:airport-reminders-disabled', onDisabled);
+    };
+  }, [user]);
+
+  return null;
+}
+
+function distanceMeters(from: { lat: number; lng: number }, to: { lat: number; lng: number }): number {
+  const toRadians = (degrees: number) => degrees * Math.PI / 180;
+  const latitudeDelta = toRadians(to.lat - from.lat);
+  const longitudeDelta = toRadians(to.lng - from.lng);
+  const value = Math.sin(latitudeDelta / 2) ** 2 +
+    Math.cos(toRadians(from.lat)) * Math.cos(toRadians(to.lat)) * Math.sin(longitudeDelta / 2) ** 2;
+  return 6_371_000 * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
+}
+
 function AppShell() {
   const { loading, error, refresh } = useAuth();
 
@@ -214,6 +301,7 @@ function AppShell() {
         <Route path="/about" element={<About />} />
       </Routes>
       <WelcomeOverlay />
+      <AirportLocationTracker />
       <GlobalOverlay />
       <BottomNav />
     </div>

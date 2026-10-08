@@ -10,6 +10,7 @@ import {
   requestBrowserNotificationPermission,
 } from '../notificationService';
 import { setCurrentSearch } from '../currentSearchStore';
+import AirportReminderOverlay from '../components/AirportReminderOverlay';
 
 const API_URL = getApiBaseUrl();
 const GEOAPIFY_KEY = process.env.REACT_APP_GEOAPIFY_KEY ?? 'd765840f666d4c9da4428757bee3d82e';
@@ -697,6 +698,8 @@ export default function SharerPage() {
           </div>
         </div>
       )}
+
+      <AirportReminderOverlay isEligible={locationPermission !== 'pending' && !locationFetching} />
 
       {showNotificationPrompt && (
         <div className="notification-permission-overlay" role="dialog" aria-modal="true" aria-labelledby="notification-permission-title">
